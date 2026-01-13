@@ -1,6 +1,5 @@
 `timescale 1ns / 1ps
 
-
 module memory #(
     parameter integer WORDS = 64
 ) (
@@ -12,7 +11,7 @@ module memory #(
     output logic [31:0] read_data
     );
 
-    reg [31:0] mem_array [0:WORDS-1]; //memory array
+    reg [31:0] mem_array [0:WORDS-1]; //memory array (32-bit)
 
     always @(posedge clk) begin
         //reset memory
@@ -29,7 +28,7 @@ module memory #(
         end
     end
 
-    //read
+    //read (asynchronous)
     always_comb begin
         read_data = mem_array[address[31:2]];
     end
