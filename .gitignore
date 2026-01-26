@@ -2,3 +2,7 @@
 /RISC-V-CPU.hw
 /RISC-V-CPU.ip_user_files
 /RISC-V-CPU.sim
+*.jou
+*.txt
+*.str
+*.log
