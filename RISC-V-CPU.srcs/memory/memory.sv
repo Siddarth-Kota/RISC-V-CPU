@@ -1,7 +1,8 @@
 `timescale 1ns / 1ps
 
 module memory #(
-    parameter integer WORDS = 64
+    parameter integer WORDS = 64,
+    parameter integer mem_init = ""
 ) (
     input logic clk, //positive edge clock
     input logic rst_n, //active low reset
@@ -12,6 +13,13 @@ module memory #(
     );
 
     reg [31:0] mem_array [0:WORDS-1]; //memory array (32-bit)
+
+    //initialize memory from file if provided
+    initial begin
+        if (mem_init != "") begin
+            $readmemh(mem_init, mem_array);
+        end
+    end
 
     always @(posedge clk) begin
         //reset memory
