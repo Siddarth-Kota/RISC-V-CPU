@@ -1,0 +1,50 @@
+——————————————————————————— I-Type ———————————————————————————
+——————————————————————————————————————————————————————————————
+31                   20 19   15 14   12 11    7 6         0
++----------------------+-------+-------+-------+----------+
+|      imm[11:0]       |  rs1  |funct3 |  rd   |  opcode  |
++----------------------+-------+-------+-------+----------+
+        12 bits         5 bits  3 bits  5 bits   7 bits
+
+Category      | Instruction | Source (From)              | Destination (To)      | Description
+---------------------------------------------------------------------------------------------------------
+Loads         | LB          | Data Memory (Address)      | Register (rd)         | Load Byte (Sign-extended)
+Loads         | LH          | Data Memory (Address)      | Register (rd)         | Load Halfword (Sign-extended)
+Loads         | LW          | Data Memory (Address)      | Register (rd)         | Load Word (32-bit)
+Loads         | LBU         | Data Memory (Address)      | Register (rd)         | Load Byte Unsigned
+Loads         | LHU         | Data Memory (Address)      | Register (rd)         | Load Halfword Unsigned
+---------------------------------------------------------------------------------------------------------
+Arithmetic    | ADDI        | Register (rs1) + Immediate | Register (rd)         | Add Immediate
+Comparison    | SLTI        | Register (rs1) + Immediate | Register (rd)         | Set Less Than Immediate
+Comparison    | SLTIU       | Register (rs1) + Immediate | Register (rd)         | Set Less Than Imm Unsigned
+Logical       | ANDI        | Register (rs1) + Immediate | Register (rd)         | Bitwise AND Immediate
+Logical       | ORI         | Register (rs1) + Immediate | Register (rd)         | Bitwise OR Immediate
+Logical       | XORI        | Register (rs1) + Immediate | Register (rd)         | Bitwise XOR Immediate
+Shifts        | SLLI        | Register (rs1) + Immediate | Register (rd)         | Shift Left Logical
+Shifts        | SRLI        | Register (rs1) + Immediate | Register (rd)         | Shift Right Logical
+Shifts        | SRAI        | Register (rs1) + Immediate | Register (rd)         | Shift Right Arithmetic
+---------------------------------------------------------------------------------------------------------
+Jumps         | JALR        | PC + 4 (Return Address)    | Register (rd)         | Jump and Link Register
+                            | Register (rs1) + Immediate | Program Counter (PC)  | (Actual Jump Target)
+---------------------------------------------------------------------------------------------------------
+System        | ECALL       | System (User Request)      | Operating System      | Environment Call (Trap)
+System        | EBREAK      | System (Debugger)          | Operating System      | Environment Break
+---------------------------------------------------------------------------------------------------------
+Mem Order     | FENCE       | Predecessor Memory Ops     | Successor Memory Ops  | Enforce memory ordering
+Mem Order     | FENCE.TSO   | Store Operations           | Load Operations       | Total Store Ordering enforcement
+Hint          | PAUSE       | N/A (Pipeline State)       | N/A (Pipeline Delay)  | Pause hint (for spin-loops)
+
+——————————————————————————————————————————————————————————————
+——————————————————————————— S-Type ———————————————————————————
+——————————————————————————————————————————————————————————————
+31        25 24     20 19     15 14    12 11      7 6         0
++-----------+---------+---------+--------+---------+----------+
+| imm[11:5] |   rs2   |   rs1   | funct3 | imm[4:0]|  opcode  |
++-----------+---------+---------+--------+---------+----------+
+   7 bits     5 bits    5 bits    3 bits   5 bits     7 bits
+
+Category      | Instruction | Source (From)             | Destination (To)           | Description
+---------------------------------------------------------------------------------------------------------
+Stores        | SB          | Register (rs2)            | Data Memory (Address)      | Store Byte (Low 8 bits)
+Stores        | SH          | Register (rs2)            | Data Memory (Address)      | Store Halfword (Low 16 bits)
+Stores        | SW          | Register (rs2)            | Data Memory (Address)      | Store Word (32 bits)

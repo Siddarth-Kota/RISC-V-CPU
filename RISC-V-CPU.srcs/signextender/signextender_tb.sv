@@ -39,6 +39,17 @@ module signextender_tb;
         assert (signed'(immediate) == -45) else $error("Test %d Failed: Expected -45, got %d", test_num, immediate);
         $display("--> Negative Immediate Test done");
 
+        test_num = 3;
+        $display("--> Testing S-type Immediate");
+        for (int i = 0; i < 10; i++) begin
+            logic [11:0] rand_imm = $urandom();
+            raw_src = {rand_imm[11:5],13'hAFAF,rand_imm[4:0]}; //S-type immediate
+            imm_source = 2'b01; //S-type
+            #1;
+            assert (immediate == {{20{rand_imm[11]}}, rand_imm}) else $error("Test %d Failed: Expected %d, got %d", test_num, {{20{rand_imm[11]}}, rand_imm}, immediate);
+        end
+        $display("--> S-type Immediate Test done");
+        
         $display("All tests done");
         $finish;
     end
