@@ -74,7 +74,7 @@ module cpu (
         write_data = mem_read;
     end
 
-    registers register_file (
+    registers registers (
         .clk(clk),
         .rst_n(rst_n),
 
