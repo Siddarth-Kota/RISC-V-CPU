@@ -41,7 +41,7 @@ module signextender_tb;
 
         test_num = 3;
         $display("--> Testing S-type Immediate");
-        for (int i = 0; i < 10; i++) begin
+        for (int i = 0; i < 100; i++) begin
             logic [11:0] rand_imm = $urandom();
             raw_src = {rand_imm[11:5],13'hAFAF,rand_imm[4:0]}; //S-type immediate
             imm_source = 2'b01; //S-type
