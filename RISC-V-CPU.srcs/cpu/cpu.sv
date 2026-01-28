@@ -37,7 +37,7 @@ module cpu (
     );
 
     // Control
-    logic [2:0] op;
+    logic [6:0] op;
     assign op = Instruction[6:0];
     logic [2:0] func3;
     assign func3 = Instruction[14:12];

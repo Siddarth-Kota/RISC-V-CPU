@@ -2,7 +2,7 @@
 
 module memory #(
     parameter integer WORDS = 64,
-    parameter integer mem_init = ""
+    parameter string mem_init = ""
 ) (
     input logic clk, //positive edge clock
     input logic rst_n, //active low reset
@@ -23,7 +23,7 @@ module memory #(
 
     always @(posedge clk) begin
         //reset memory
-        if(rst_n == 1'b0) begin
+        if(rst_n == 1'b0 && mem_init == "") begin
             for(int i = 0; i < WORDS; i = i + 1) begin
                 mem_array[i] <= 32'b0;
             end
