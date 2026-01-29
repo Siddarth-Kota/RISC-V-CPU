@@ -81,6 +81,9 @@ module cpu_tb;
         assert (dut.registers.reg_array[20] == expected) else $error("R-type ADD Test Failed. Register x20: Expected %h, got %h", expected, dut.registers.reg_array[20]);
         $display("R-type ADD Instruction Test done");
 
+        test_num = 5;
+        
+
 
         $display("CPU instruction tests complete");
         $finish;

@@ -85,6 +85,20 @@ module control_tb();
             assert (write_back_source   === 1'b0)   else $error("Assertion failed: write_back_source != 0 (Got %b)", write_back_source);
             $display("--> R-type ADD Instruction Test done");
 
+            test_num = 4;
+            set_default_vals();
+            #1;
+            op = 7'b0110011; // R-type AND
+            func3 = 3'b111;
+            #1;
+            $display("Test R-type AND Instruction:");
+            assert (alu_control === 3'b010) else $error("Assertion failed: alu_control != 010 (Got %b)", alu_control);
+            assert (reg_write   === 1'b1)   else $error("Assertion failed: reg_write != 1 (Got %b)", reg_write);
+            assert (mem_write   === 1'b0)   else $error("Assertion failed: mem_write != 0 (Got %b)", mem_write);
+            assert (alu_source   === 1'b0)   else $error("Assertion failed: alu_source != 0 (Got %b)", alu_source);
+            assert (write_back_source   === 1'b0)   else $error("Assertion failed: write_back_source != 0 (Got %b)", write_back_source);
+            $display("--> R-type AND Instruction Test done");
+
             #10;
             $display("All tests completed");
             $finish;

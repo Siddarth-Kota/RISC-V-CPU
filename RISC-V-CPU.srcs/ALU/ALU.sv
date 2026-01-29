@@ -12,6 +12,7 @@ module ALU (
     always_comb begin
         case(alu_control)
             3'b000 : alu_result = operand1 + operand2; //ADD
+            3'b010 : alu_result = operand1 & operand2; //AND
             default: alu_result = 32'b0;
         endcase
     end
