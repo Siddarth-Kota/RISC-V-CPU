@@ -49,6 +49,8 @@ module cpu (
     wire [1:0] imm_source;
     wire mem_write;
     wire reg_write;
+    wire alu_source;
+    wire write_back_source;
 
     control control_unit (
         .op(op),
@@ -59,7 +61,9 @@ module cpu (
         .alu_control(alu_control),
         .imm_source(imm_source),
         .mem_write(mem_write),
-        .reg_write(reg_write)
+        .reg_write(reg_write),
+        .alu_source(alu_source),
+        .write_back_source(write_back_source)   
     );
 
     //RegFile
@@ -71,7 +75,10 @@ module cpu (
     
     logic [31:0] write_data;
     always_comb begin : wbSelect
-        write_data = mem_read;
+        case (write_back_source)
+            1'b1 : write_data = mem_read;
+            default : write_data = alu_result;
+        endcase
     end
 
     registers registers (
@@ -105,8 +112,11 @@ module cpu (
     wire [31:0] alu_result;
     logic [31:0] alu_op2;
 
-    always_comb begin : srcBSelect
-        alu_op2 = immediate;
+    always_comb begin : alu_source_select
+        case (alu_source)
+            1'b1 : alu_op2 = immediate;
+            default : alu_op2 = reg_data2;
+        endcase
     end
 
     ALU alu_inst(

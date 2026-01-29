@@ -1,5 +1,6 @@
 ——————————————————————————— I-Type ———————————————————————————
 ——————————————————————————————————————————————————————————————
+
 31                   20 19   15 14   12 11    7 6         0
 +----------------------+-------+-------+-------+----------+
 |      imm[11:0]       |  rs1  |funct3 |  rd   |  opcode  |
@@ -37,6 +38,7 @@ Hint          | PAUSE       | N/A (Pipeline State)       | N/A (Pipeline Delay) 
 ——————————————————————————————————————————————————————————————
 ——————————————————————————— S-Type ———————————————————————————
 ——————————————————————————————————————————————————————————————
+
 31        25 24     20 19     15 14    12 11      7 6         0
 +-----------+---------+---------+--------+---------+----------+
 | imm[11:5] |   rs2   |   rs1   | funct3 | imm[4:0]|  opcode  |
@@ -48,3 +50,26 @@ Category      | Instruction | Source (From)             | Destination (To)      
 Stores        | SB          | Register (rs2)            | Data Memory (Address)      | Store Byte (Low 8 bits)
 Stores        | SH          | Register (rs2)            | Data Memory (Address)      | Store Halfword (Low 16 bits)
 Stores        | SW          | Register (rs2)            | Data Memory (Address)      | Store Word (32 bits)
+
+——————————————————————————————————————————————————————————————
+——————————————————————————— R-Type ———————————————————————————
+——————————————————————————————————————————————————————————————
+
+31       25 24     20 19     15 14    12 11      7 6        0
++----------+---------+---------+--------+---------+----------+
+|  funct7  |   rs2   |   rs1   | funct3 |    rd   |  opcode  |
++----------+---------+---------+--------+---------+----------+
+   7 bits    5 bits    5 bits    3 bits   5 bits     7 bits
+
+Category      | Instruction | Source (From)             | Destination (To)           | Description
+---------------------------------------------------------------------------------------------------------
+Arithmetic    | ADD         | Registers (rs1, rs2)      | Register (rd)              | Add rs1 and rs2
+Arithmetic    | SUB         | Registers (rs1, rs2)      | Register (rd)              | Subtract rs2 from rs1
+Logical       | SLL         | Registers (rs1, rs2)      | Register (rd)              | Shift Left Logical
+Compare       | SLT         | Registers (rs1, rs2)      | Register (rd)              | Set Less Than (signed)
+Compare       | SLTU        | Registers (rs1, rs2)      | Register (rd)              | Set Less Than Unsigned
+Logical       | XOR         | Registers (rs1, rs2)      | Register (rd)              | Bitwise Exclusive OR
+Logical       | SRL         | Registers (rs1, rs2)      | Register (rd)              | Shift Right Logical
+Logical       | SRA         | Registers (rs1, rs2)      | Register (rd)              | Shift Right Arithmetic
+Logical       | OR          | Registers (rs1, rs2)      | Register (rd)              | Bitwise OR
+Logical       | AND         | Registers (rs1, rs2)      | Register (rd)              | Bitwise AND
