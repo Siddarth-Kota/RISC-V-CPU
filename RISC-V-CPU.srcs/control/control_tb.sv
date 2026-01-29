@@ -45,20 +45,24 @@ module control_tb();
             #1;
             op = 7'b0000011; // lw
             #1;
-            
             $display("Test LW Instruction:");
-
-            func3 = 3'b000;
-            func7 = 7'b0000000;
-            alu_zero = 1'b0;
-            #1;
             assert (alu_control === 3'b000) else $error("Assertion failed: alu_control != 000 (Got %b)", alu_control);
             assert (imm_source  === 2'b00)  else $error("Assertion failed: imm_source != 00 (Got %b)", imm_source);
             assert (mem_write   === 1'b0)   else $error("Assertion failed: mem_write != 1 (Got %b)", mem_write);
             assert (reg_write   === 1'b1)   else $error("Assertion failed: reg_write != 1 (Got %b)", reg_write);
             $display("LW Instruction Test done");
             
-            
+            test_num = 2;
+            set_default_vals();
+            #1;
+            op = 7'b0100011; // sw
+            #1;
+            $display("Test SW Instruction:");
+            assert (alu_control === 3'b000) else $error("Assertion failed: alu_control != 000 (Got %b)", alu_control);
+            assert (imm_source  === 2'b01)  else $error("Assertion failed: imm_source != 01 (Got %b)", imm_source);
+            assert (mem_write   === 1'b1)   else $error("Assertion failed: mem_write != 1 (Got %b)", mem_write);
+            assert (reg_write   === 1'b0)   else $error("Assertion failed: reg_write != 0 (Got %b)", reg_write);
+            $display("SW Instruction Test done");
 
             #10;
             $display("All tests completed");

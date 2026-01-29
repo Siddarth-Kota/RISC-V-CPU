@@ -126,9 +126,9 @@ module cpu (
     ) data_memory (
         .clk(clk),
         .rst_n(1'b1),
-        .write_enable(1'b0),
+        .write_enable(mem_write),
         .address(alu_result),
-        .write_data(32'b0),
+        .write_data(reg_data2),
 
         .read_data(mem_read)
     );

@@ -22,6 +22,12 @@ module control(
                 imm_source = 2'b0;
                 alu_op = 2'b00;
             end
+            7'b0100011: begin //sw
+                reg_write = 1'b0;
+                mem_write = 1'b1;
+                imm_source = 2'b01;
+                alu_op = 2'b00;
+            end
             default: begin
                 reg_write = 1'b0;
                 mem_write = 1'b0;

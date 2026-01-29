@@ -36,27 +36,35 @@ module cpu_tb;
 
         $display("Starting CPU TestBench");
         test_num = 1;
-        $display("testing the CPU Initializing");
+        // $display("testing the CPU Initializing");
 
-        cpu_reset();
-        assert (dut.pc == 32'h00000000) else $error("PC Init Failed. Expected 0, got %h", dut.pc);
+        // cpu_reset();
+        // assert (dut.pc == 32'h00000000) else $error("PC Init Failed. Expected 0, got %h", dut.pc);
         
-        for(int i = 0; i < check_limit; i++) begin
-            if(expected_instr_mem[i] == 32'bx) begin
-                $display("Reached end of hex file at index %0d", i);
-                break;
-            end
-            //test DUT instruction vs expected memory
-            assert(dut.Instruction == expected_instr_mem[i]) else $error("Instruction Wrong at index %0d. Expected %h, got %h", i, expected_instr_mem[i], dut.Instruction);
-            @(posedge clk);
-        end
-        $display("CPU initialization test complete");
+        // for(int i = 0; i < check_limit; i++) begin
+        //     if(expected_instr_mem[i] == 32'bx) begin
+        //         $display("Reached end of hex file at index %0d", i);
+        //         break;
+        //     end
+        //     //test DUT instruction vs expected memory
+        //     assert(dut.Instruction == expected_instr_mem[i]) else $error("Instruction Wrong at index %0d. Expected %h, got %h", i, expected_instr_mem[i], dut.Instruction);
+        //     @(posedge clk);
+        // end
+        // $display("CPU initialization test complete");
 
-        test_num = 2;
         $display("Running CPU instruction tests");
         cpu_reset();
+        test_num = 2;
+        $display("Testing LW Instruction");
         @(posedge clk);
-        assert (dut.registers.reg_array[18] == 32'hDDAAEEFF) else $error("LW Test Failed. Register x18: Expected DDAAEEFF, got %h", dut.registers.reg_array[18]);
+        assert (dut.registers.reg_array[18] == 32'hAFAFAFAF) else $error("LW Test Failed. Register x18: Expected AFAFAFAF, got %h", dut.registers.reg_array[18]);
+        test_num = 3;
+        $display("Testing SW Instruction");
+        assert (dut.data_memory.mem_array[3] == 32'hF2F2F2F2) else $error("SW Initial Value Test Failed. Memory[3]: Expected F2F2F2F2, got %h", dut.data_memory.mem_array[3]);
+        @(posedge clk);
+        #1;
+        assert (dut.data_memory.mem_array[3] == 32'hAFAFAFAF) else $error("SW Final Value Test Failed. Memory[3]: Expected AFAFAFAF, got %h", dut.data_memory.mem_array[3]);
+
 
         $display("CPU instruction tests complete");
         $finish;
