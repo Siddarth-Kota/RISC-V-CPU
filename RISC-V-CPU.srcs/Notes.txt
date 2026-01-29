@@ -11,7 +11,7 @@ Category      | Instruction | Source (From)              | Destination (To)     
 ---------------------------------------------------------------------------------------------------------
 Loads         | LB          | Data Memory (Address)      | Register (rd)         | Load Byte (Sign-extended)
 Loads         | LH          | Data Memory (Address)      | Register (rd)         | Load Halfword (Sign-extended)
-Loads         | LW          | Data Memory (Address)      | Register (rd)         | Load Word (32-bit)
+Loads         | LW          | Data Memory (Address)      | Register (rd)         | Load Word (32-bit) 
 Loads         | LBU         | Data Memory (Address)      | Register (rd)         | Load Byte Unsigned
 Loads         | LHU         | Data Memory (Address)      | Register (rd)         | Load Halfword Unsigned
 ---------------------------------------------------------------------------------------------------------

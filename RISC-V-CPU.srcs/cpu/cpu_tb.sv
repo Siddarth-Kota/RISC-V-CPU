@@ -19,6 +19,7 @@ module cpu_tb;
     end
 
     logic [31:0] expected_instr_mem [0:255];
+    logic [31:0] expected;
 
     task cpu_reset();
         begin
@@ -54,16 +55,31 @@ module cpu_tb;
 
         $display("Running CPU instruction tests");
         cpu_reset();
+
         test_num = 2;
-        $display("Testing LW Instruction");
+        $display("--> Testing LW Instruction");
         @(posedge clk);
         assert (dut.registers.reg_array[18] == 32'hAFAFAFAF) else $error("LW Test Failed. Register x18: Expected AFAFAFAF, got %h", dut.registers.reg_array[18]);
+        $display("LW Instruction Test done");
+
         test_num = 3;
-        $display("Testing SW Instruction");
+        $display("--> Testing SW Instruction");
         assert (dut.data_memory.mem_array[3] == 32'hF2F2F2F2) else $error("SW Initial Value Test Failed. Memory[3]: Expected F2F2F2F2, got %h", dut.data_memory.mem_array[3]);
         @(posedge clk);
         #1;
         assert (dut.data_memory.mem_array[3] == 32'hAFAFAFAF) else $error("SW Final Value Test Failed. Memory[3]: Expected AFAFAFAF, got %h", dut.data_memory.mem_array[3]);
+        $display("SW Instruction Test done");
+
+        test_num = 4;
+        $display("--> Testing R-type ADD Instruction");
+        expected = 32'hAFAFAFAF + 32'h12341234;
+        @(posedge clk);
+        #1;
+        assert (dut.registers.reg_array[19] == 32'h12341234) else $error("R-type ADD Test Failed. Register x19: Expected 12341234, got %h", dut.registers.reg_array[19]);
+        @(posedge clk);
+        #1;
+        assert (dut.registers.reg_array[20] == expected) else $error("R-type ADD Test Failed. Register x20: Expected %h, got %h", expected, dut.registers.reg_array[20]);
+        $display("R-type ADD Instruction Test done");
 
 
         $display("CPU instruction tests complete");
