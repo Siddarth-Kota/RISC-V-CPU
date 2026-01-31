@@ -59,6 +59,18 @@ module ALU_tb;
         end
         $display("--> Test 2 done.");
 
+        //OR operation test
+        $display("--> Test 3: OR operation");
+        test_num = 3;
+        alu_control = 3'b011; //OR
+        for(int i = 0; i < 1000; i++) begin
+            operand1 = $urandom();
+            operand2 = $urandom();
+            #1
+            assert (alu_result === (operand1 | operand2)) else $error("Test Failed: OR operation incorrect for operands %0d and %0d. Expected %0d, got %0d", operand1, operand2, (operand1 | operand2), alu_result);
+        end
+        $display("--> Test 3 done.");
+        
         //end of tests
         $display("All tests completed.");
         $finish;

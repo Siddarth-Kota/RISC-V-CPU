@@ -89,6 +89,21 @@ module cpu_tb;
         assert (dut.registers.reg_array[21] == expected) else $error("R-type AND Test Failed. Register x21: Expected %h, got %h", expected, dut.registers.reg_array[21]);
         $display("R-type AND Instruction Test done");
 
+        test_num = 6;
+        $display("--> Testing R-type OR Instruction");
+        expected = 32'h56785678 | 32'hBCBCBCBC;
+        @(posedge clk);
+        #1;
+        assert (dut.registers.reg_array[5] == 32'h56785678) else $error("R-type OR Test Failed. Register x5: Expected 56785678, got %h", dut.registers.reg_array[5]);
+        @(posedge clk);
+        #1;
+        assert (dut.registers.reg_array[6] == 32'hBCBCBCBC) else $error("R-type OR Test Failed. Register x6: Expected BCBCBCBC, got %h", dut.registers.reg_array[6]);
+        @(posedge clk);
+        #1;
+        assert (dut.registers.reg_array[7] == expected) else $error("R-type OR Test Failed. Register x7: Expected %h, got %h", expected, dut.registers.reg_array[7]);
+        $display("R-type OR Instruction Test done");
+
+
         $display("CPU instruction tests complete");
         $finish;
     end
