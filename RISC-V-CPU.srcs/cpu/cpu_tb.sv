@@ -82,8 +82,12 @@ module cpu_tb;
         $display("R-type ADD Instruction Test done");
 
         test_num = 5;
-        
-
+        $display("--> Testing R-type AND Instruction");
+        expected = expected & 32'hAFAFAFAF;
+        @(posedge clk);
+        #1;
+        assert (dut.registers.reg_array[21] == expected) else $error("R-type AND Test Failed. Register x21: Expected %h, got %h", expected, dut.registers.reg_array[21]);
+        $display("R-type AND Instruction Test done");
 
         $display("CPU instruction tests complete");
         $finish;
