@@ -6,15 +6,15 @@
 01802283  //OR  TEST START : lw x5 0x18(x0)     | x5  <= 56785678
 01C02303  //                 lw x6 0x1C(x0)     | x6  <= BCBCBCBC
 0062E3B3  //                 or x7 x5 x6        | x7  <= FEFCFEFC
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
+00730663  //BEQ TEST START : beq x7 x5 0xC      | #1 - Shouldn't Branch
+00802B03  //                 lw x22 0x8(x0)     | x22 <= AFAFAFAF
+01690863  //                 beq x18 x22 0x10   | #2 - Should Branch (+ offset)
+00000013  //                 NOP
+00000013  //                 NOP
+00000663  //                 beq x0 x0 0xC      | #4 - Should Branch (avoid loop)
+00002B03  //                 lw x22 0x0(x0)     | x22 <= ABABABAB
+FF6B0CE3  //                 beq x22 x22 -0x8   | #3 Should Branch (-offset)
+00000013  //                 NOP
 00000013  //NOP
 00000013  //NOP
 00000013  //NOP

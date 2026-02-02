@@ -66,7 +66,7 @@ module cpu_tb;
         $display("--> Testing SW Instruction");
         assert (dut.data_memory.mem_array[3] == 32'hF2F2F2F2) else $error("SW Initial Value Test Failed. Memory[3]: Expected F2F2F2F2, got %h", dut.data_memory.mem_array[3]);
         @(posedge clk);
-        #1;
+        #0.1;
         assert (dut.data_memory.mem_array[3] == 32'hAFAFAFAF) else $error("SW Final Value Test Failed. Memory[3]: Expected AFAFAFAF, got %h", dut.data_memory.mem_array[3]);
         $display("SW Instruction Test done");
 
@@ -74,10 +74,10 @@ module cpu_tb;
         $display("--> Testing R-type ADD Instruction");
         expected = 32'hAFAFAFAF + 32'h12341234;
         @(posedge clk);
-        #1;
+        #0.1;
         assert (dut.registers.reg_array[19] == 32'h12341234) else $error("R-type ADD Test Failed. Register x19: Expected 12341234, got %h", dut.registers.reg_array[19]);
         @(posedge clk);
-        #1;
+        #0.1;
         assert (dut.registers.reg_array[20] == expected) else $error("R-type ADD Test Failed. Register x20: Expected %h, got %h", expected, dut.registers.reg_array[20]);
         $display("R-type ADD Instruction Test done");
 
@@ -85,7 +85,7 @@ module cpu_tb;
         $display("--> Testing R-type AND Instruction");
         expected = expected & 32'hAFAFAFAF;
         @(posedge clk);
-        #1;
+        #0.1;
         assert (dut.registers.reg_array[21] == expected) else $error("R-type AND Test Failed. Register x21: Expected %h, got %h", expected, dut.registers.reg_array[21]);
         $display("R-type AND Instruction Test done");
 
@@ -93,15 +93,46 @@ module cpu_tb;
         $display("--> Testing R-type OR Instruction");
         expected = 32'h56785678 | 32'hBCBCBCBC;
         @(posedge clk);
-        #1;
+        #0.1;
         assert (dut.registers.reg_array[5] == 32'h56785678) else $error("R-type OR Test Failed. Register x5: Expected 56785678, got %h", dut.registers.reg_array[5]);
         @(posedge clk);
-        #1;
+        #0.1;
         assert (dut.registers.reg_array[6] == 32'hBCBCBCBC) else $error("R-type OR Test Failed. Register x6: Expected BCBCBCBC, got %h", dut.registers.reg_array[6]);
         @(posedge clk);
-        #1;
+        #0.1;
         assert (dut.registers.reg_array[7] == expected) else $error("R-type OR Test Failed. Register x7: Expected %h, got %h", expected, dut.registers.reg_array[7]);
         $display("R-type OR Instruction Test done");
+
+        $display("Testing B-type BEQ Instruction");
+        test_num = 7;
+
+        assert (dut.Instruction == 32'h00730663) else $error("BEQ Instruction Test Failed. Expected 00730663, got %h", dut.Instruction);
+        
+        @(posedge clk); //Branch not taken
+        #0.1;
+        assert (dut.Instruction == 32'h00802B03) else $error("BEQ Instruction Test Failed. Expected 00802B03, got %h", dut.Instruction);
+        
+        @(posedge clk); //set Register x22
+        #0.1;
+        assert (dut.registers.reg_array[22] == 32'hAFAFAFAF) else $error("BEQ Test Failed. Register x22: Expected AFAFAFAF, got %h", dut.registers.reg_array[22]);
+        
+        @(posedge clk); //Branch taken
+        #0.1;
+        assert (dut.Instruction == 32'h00002B03) else $error("BEQ Instruction Test Failed. Expected 00002B03, got %h", dut.Instruction);
+        
+        @(posedge clk); //set Register x22 to new value
+        #0.1;
+        assert (dut.registers.reg_array[22] == 32'hABABABAB) else $error("BEQ Test Failed. Register x22: Expected ABABABAB, got %h", dut.registers.reg_array[22]);
+        
+        @(posedge clk); //Branch taken
+        #0.1;
+        assert (dut.Instruction == 32'h00000663) else $error("BEQ Instruction Test Failed. Expected 00000663, got %h", dut.Instruction);
+        
+        @(posedge clk); //Branch taken
+        #0.1;
+        assert (dut.Instruction == 32'h00000013) else $error("BEQ Instruction Test Failed. Expected 00000013, got %h", dut.Instruction);
+        
+        $display("B-type BEQ Instruction Test done");
 
 
         $display("CPU instruction tests complete");
