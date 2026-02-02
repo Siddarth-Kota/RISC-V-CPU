@@ -10,6 +10,7 @@ module ALU_tb;
 
     //debug
     logic [2:0] test_num = -1;
+    logic [31:0] expected;
 
     ALU dut (
         .alu_control(alu_control),
@@ -42,8 +43,9 @@ module ALU_tb;
         for(int i = 0; i < 1000; i++) begin
             operand1 = $urandom();
             operand2 = $urandom();
-            #1
-            assert (alu_result === (operand1 + operand2)) else $error("Test Failed: ADD operation incorrect for operands %0d and %0d. Expected %0d, got %0d", operand1, operand2, (operand1 + operand2), alu_result);
+            expected = operand1 + operand2;
+            #1;
+            assert (alu_result === expected) else $error("Test Failed: ADD operation incorrect for operands %0d and %0d. Expected %0d, got %0d", operand1, operand2, expected, alu_result);
         end
         $display("--> Test 1 done.");
 
@@ -54,8 +56,9 @@ module ALU_tb;
         for(int i = 0; i < 1000; i++) begin
             operand1 = $urandom();
             operand2 = $urandom();
-            #1
-            assert (alu_result === (operand1 & operand2)) else $error("Test Failed: AND operation incorrect for operands %0d and %0d. Expected %0d, got %0d", operand1, operand2, (operand1 & operand2), alu_result);
+            expected = operand1 & operand2;
+            #1;
+            assert (alu_result === expected) else $error("Test Failed: AND operation incorrect for operands %0d and %0d. Expected %0d, got %0d", operand1, operand2, expected, alu_result);
         end
         $display("--> Test 2 done.");
 
@@ -66,11 +69,26 @@ module ALU_tb;
         for(int i = 0; i < 1000; i++) begin
             operand1 = $urandom();
             operand2 = $urandom();
-            #1
-            assert (alu_result === (operand1 | operand2)) else $error("Test Failed: OR operation incorrect for operands %0d and %0d. Expected %0d, got %0d", operand1, operand2, (operand1 | operand2), alu_result);
+            expected = operand1 | operand2;
+            #1;
+            assert (alu_result === expected) else $error("Test Failed: OR operation incorrect for operands %0d and %0d. Expected %0d, got %0d", operand1, operand2, expected, alu_result);
         end
         $display("--> Test 3 done.");
-        
+
+        //SUB operation test
+        $display("--> Test 4: SUB operation");
+        test_num = 4;
+        alu_control = 3'b001; //SUB
+        for(int i = 0; i < 1000; i++) begin
+            operand1 = $urandom();
+            operand2 = $urandom();
+            expected = operand1 + (~operand2 + 1'b1);
+            #1
+            assert (alu_result === expected) else $error("Test Failed: SUB operation incorrect for operands %0d and %0d. Expected %0d, got %0d", operand1, operand2, expected, alu_result);
+        end
+        $display("--> Test 4 done.");
+
+        test_num = 0;
         //end of tests
         $display("All tests completed.");
         $finish;

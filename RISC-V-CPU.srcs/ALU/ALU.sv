@@ -14,6 +14,7 @@ module ALU (
             3'b000 : alu_result = operand1 + operand2; //ADD
             3'b010 : alu_result = operand1 & operand2; //AND
             3'b011 : alu_result = operand1 | operand2; //OR
+            3'b001 : alu_result = operand1 + (~operand2 + 1'b1); //SUB
             default: alu_result = 32'b0;
         endcase
     end
