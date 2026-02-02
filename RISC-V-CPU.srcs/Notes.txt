@@ -73,3 +73,23 @@ Logical       | SRL         | Registers (rs1, rs2)      | Register (rd)         
 Logical       | SRA         | Registers (rs1, rs2)      | Register (rd)              | Shift Right Arithmetic
 Logical       | OR          | Registers (rs1, rs2)      | Register (rd)              | Bitwise OR
 Logical       | AND         | Registers (rs1, rs2)      | Register (rd)              | Bitwise AND
+
+——————————————————————————————————————————————————————————————
+——————————————————————————— B-Type ———————————————————————————
+——————————————————————————————————————————————————————————————
+
+31        30        25 24     20 19     15 14      12 11       8      7         0
++---------+-----------+---------+---------+----------+---------+------+---------+
+| imm[12] | imm[10:5] |   rs2   |   rs1   |  funct3  |  imm    | imm  |    op   |
++---------+-----------+---------+---------+----------+---------+------+---------+
+ 1 bit       6 bits     5 bits    5 bits    3 bits     4 bits   1 bit   7 bits
+
+
+Category  | Instruction | Source (From)             | Destination (To)  | Description
+---------------------------------------------------------------------------------------------------------
+Branch    | BEQ         | Registers (rs1, rs2)      | PC                | Branch if Equal
+Branch    | BNE         | Registers (rs1, rs2)      | PC                | Branch if Not Equal
+Branch    | BLT         | Registers (rs1, rs2)      | PC                | Branch if Less Than (signed)
+Branch    | BGE         | Registers (rs1, rs2)      | PC                | Branch if Greater or Equal (signed)
+Branch    | BLTU        | Registers (rs1, rs2)      | PC                | Branch if Less Than (unsigned)
+Branch    | BGEU        | Registers (rs1, rs2)      | PC                | Branch if Greater or Equal (unsigned) 
