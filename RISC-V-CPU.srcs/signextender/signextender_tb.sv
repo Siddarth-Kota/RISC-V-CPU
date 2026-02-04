@@ -27,7 +27,7 @@ module signextender_tb;
         #1;
         assert (immediate == 32'b0000_0000_0000_0000_0000_0000_0111_1011) else $error("Test %d Failed: Expected 123, got %d", test_num, immediate);
         assert (immediate == 32'd123) else $error("Test %d Failed: Expected 123, got %d", test_num, immediate);
-        $display("--> Postive I-type Immediate Test done");
+        $display("Postive I-type Immediate Test done");
 
         test_num = 2;
         
@@ -37,7 +37,7 @@ module signextender_tb;
         #1;
         assert (immediate == 32'b1111_1111_1111_1111_1111_1111_1101_0011) else $error("Test %d Failed: Expected -45, got %d", test_num, immediate);
         assert (signed'(immediate) == -45) else $error("Test %d Failed: Expected -45, got %d", test_num, immediate);
-        $display("--> Negative I-type Immediate Test done");
+        $display("Negative I-type Immediate Test done");
 
         test_num = 3;
         $display("--> Testing S-type Immediate");
@@ -48,18 +48,29 @@ module signextender_tb;
             #1;
             assert (immediate == {{20{rand_imm[11]}}, rand_imm}) else $error("Test %d Failed: Expected %d, got %d", test_num, {{20{rand_imm[11]}}, rand_imm}, immediate);
         end
-        $display("--> S-type Immediate Test done");
+        $display("S-type Immediate Test done");
 
         test_num = 4;
         $display("--> Testing B-type Immediate");
         imm_source = 2'b10; //B-type
         for (int i = 0; i < 100; i++) begin
             logic [12:0] random_imm = $urandom() & 13'h1FFE; //make sure LSB is 0
-            raw_src = {32'(random_imm[12]) << 24 | 32'(random_imm[11]) << 0 | 32'(random_imm[10:5]) << 18 | 32'(random_imm[4:1]) << 1};
+            raw_src = 32'(random_imm[12]) << 24 | 32'(random_imm[11]) << 0 | 32'(random_imm[10:5]) << 18 | 32'(random_imm[4:1]) << 1;
             #1;
             assert (immediate == {{19{random_imm[12]}}, random_imm}) else $error("Test %d Failed: Expected %d, got %d", test_num, {{19{random_imm[12]}}, random_imm}, immediate);
         end
-        $display("--> B-type Immediate Test done");
+        $display("B-type Immediate Test done");
+
+        test_num = 5;
+        $display("--> Testing J-type Immediate");
+        imm_source = 2'b11; //J-type
+        for (int i = 0; i < 100; i++) begin
+            logic [20:0] random_imm = $urandom() & 21'h1FFFFE; //make sure LSB is 0
+            raw_src = 32'(random_imm[20]) << 24 | 32'(random_imm[19:12]) << 5 | 32'(random_imm[11]) << 13 | 32'(random_imm[10:1]) << 14;
+            #1;
+            assert (immediate == {{11{random_imm[20]}}, random_imm}) else $error("Test %d Failed: Expected %d, got %d", test_num, {{11{random_imm[20]}}, random_imm}, immediate);
+        end
+        $display("J-type Immediate Test done");
         
         $display("All tests done");
         $finish;
