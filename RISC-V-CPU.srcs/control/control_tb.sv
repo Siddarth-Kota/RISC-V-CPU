@@ -13,12 +13,13 @@ module control_tb();
         logic mem_write;
         logic reg_write;
         logic alu_source;
-        logic write_back_source;
+        logic [1:0] write_back_source;
         logic pc_source;
         logic branch;
+        logic jump;
 
         //Debug
-        logic [2:0] test_num = 0;
+        logic [3:0] test_num = 0;
 
         control dut (
             .op(op),
@@ -32,7 +33,8 @@ module control_tb();
             .alu_source(alu_source),
             .write_back_source(write_back_source),
             .pc_source(pc_source),
-            .branch(branch)
+            .branch(branch),
+            .jump(jump)
         );
 
         task set_default_vals();
@@ -59,7 +61,7 @@ module control_tb();
             assert (mem_write   === 1'b0)   else $error("Assertion failed: mem_write != 1 (Got %b)", mem_write);
             assert (reg_write   === 1'b1)   else $error("Assertion failed: reg_write != 1 (Got %b)", reg_write);
             assert (alu_source   === 1'b1)   else $error("Assertion failed: alu_source != 1 (Got %b)", alu_source);
-            assert (write_back_source   === 1'b1)   else $error("Assertion failed: write_back_source != 1 (Got %b)", write_back_source);
+            assert (write_back_source   === 2'b01)   else $error("Assertion failed: write_back_source != 1 (Got %b)", write_back_source);
             assert (pc_source   === 1'b0)   else $error("Assertion failed: pc_source != 0 (Got %b)", pc_source);
             $display("--> LW Instruction Test done");
             
@@ -88,7 +90,7 @@ module control_tb();
             assert (reg_write   === 1'b1)   else $error("Assertion failed: reg_write != 1 (Got %b)", reg_write);
             assert (mem_write   === 1'b0)   else $error("Assertion failed: mem_write != 0 (Got %b)", mem_write);
             assert (alu_source   === 1'b0)   else $error("Assertion failed: alu_source != 0 (Got %b)", alu_source);
-            assert (write_back_source   === 1'b0)   else $error("Assertion failed: write_back_source != 0 (Got %b)", write_back_source);
+            assert (write_back_source   === 2'b00)   else $error("Assertion failed: write_back_source != 0 (Got %b)", write_back_source);
             assert (pc_source   === 1'b0)   else $error("Assertion failed: pc_source != 0 (Got %b)", pc_source);
             $display("--> R-type ADD Instruction Test done");
 
@@ -103,7 +105,7 @@ module control_tb();
             assert (reg_write   === 1'b1)   else $error("Assertion failed: reg_write != 1 (Got %b)", reg_write);
             assert (mem_write   === 1'b0)   else $error("Assertion failed: mem_write != 0 (Got %b)", mem_write);
             assert (alu_source   === 1'b0)   else $error("Assertion failed: alu_source != 0 (Got %b)", alu_source);
-            assert (write_back_source   === 1'b0)   else $error("Assertion failed: write_back_source != 0 (Got %b)", write_back_source);
+            assert (write_back_source   === 2'b00)   else $error("Assertion failed: write_back_source != 0 (Got %b)", write_back_source);
             assert (pc_source   === 1'b0)   else $error("Assertion failed: pc_source != 0 (Got %b)", pc_source);
             $display("--> R-type AND Instruction Test done");
 
@@ -118,7 +120,7 @@ module control_tb();
             assert (reg_write   === 1'b1)   else $error("Assertion failed: reg_write != 1 (Got %b)", reg_write);
             assert (mem_write   === 1'b0)   else $error("Assertion failed: mem_write != 0 (Got %b)", mem_write);
             assert (alu_source   === 1'b0)   else $error("Assertion failed: alu_source != 0 (Got %b)", alu_source);
-            assert (write_back_source   === 1'b0)   else $error("Assertion failed: write_back_source != 0 (Got %b)", write_back_source);
+            assert (write_back_source   === 2'b00)   else $error("Assertion failed: write_back_source != 0 (Got %b)", write_back_source);
             assert (pc_source   === 1'b0)   else $error("Assertion failed: pc_source != 0 (Got %b)", pc_source);
             $display("--> R-type OR Instruction Test done");
 
@@ -140,12 +142,28 @@ module control_tb();
             $display("--> B-type BEQ Instruction Test (Not Taken) done");
 
             test_num = 7;
+            set_default_vals();
             #1;
             alu_zero = 1'b1;
             #1;
             $display("Test B-type BEQ Instruction (Taken):");
             assert (pc_source   === 1'b1)   else $error("Assertion failed: pc_source != 1 (Got %b)", pc_source);
             $display("--> B-type BEQ Instruction Test (Taken) done");
+
+            test_num = 8;
+            set_default_vals();
+            #1;
+            op = 7'b1101111; // J-type JAL
+            #1;
+            $display("Test J-type JAL Instruction:");
+            assert (imm_source  === 2'b11)  else $error("Assertion failed: imm_source != 11 (Got %b)", imm_source);
+            assert (reg_write   === 1'b1)   else $error("Assertion failed: reg_write != 1 (Got %b)", reg_write);
+            assert (mem_write   === 1'b0)   else $error("Assertion failed: mem_write != 0 (Got %b)", mem_write);
+            assert (write_back_source   === 2'b10)   else $error("Assertion failed: write_back_source != 10 (Got %b)", write_back_source);
+            assert (pc_source   === 1'b1)   else $error("Assertion failed: pc_source != 1 (Got %b)", pc_source);
+            assert (jump   === 1'b1)   else $error("Assertion failed: jump != 1 (Got %b)", jump);
+            assert (branch   === 1'b0)   else $error("Assertion failed: branch != 0 (Got %b)", branch);
+            $display("--> J-type JAL Instruction Test done");
 
             test_num = 0;
             #10;
