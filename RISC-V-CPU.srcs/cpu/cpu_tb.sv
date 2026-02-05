@@ -6,7 +6,7 @@ module cpu_tb;
     logic rst_n;
 
     //debug
-    logic [2:0] test_num = 0;
+    logic [3:0] test_num = 0;
 
     cpu dut (
         .clk(clk),
@@ -96,9 +96,9 @@ module cpu_tb;
         assert (dut.registers.reg_array[7] == expected) else $error("R-type OR Test Failed. Register x7: Expected %h, got %h", expected, dut.registers.reg_array[7]);
         $display("R-type OR Instruction Test done");
 
+
         $display("--> Testing B-type BEQ Instruction");
         test_num = 7;
-
         assert (dut.Instruction == 32'h00730663) else $error("BEQ Instruction Test Failed. Expected 00730663, got %h", dut.Instruction);
         
         @(posedge clk); #0.1; //Branch not taken
@@ -121,6 +121,32 @@ module cpu_tb;
         
         $display("B-type BEQ Instruction Test done");
 
+
+        $display("J-type JAL Instruction Test");
+        test_num = 8;
+
+        @(posedge clk); #0.1;
+        assert (dut.Instruction == 32'h00C000EF) else $error("JAL Instruction Test Failed. Expected 00C000EF, got %h", dut.Instruction);
+        assert (dut.pc == 32'h00000044) else $error("JAL Instruction Test Failed. PC Expected 00000044, got %h", dut.pc);
+        
+        @(posedge clk); #0.1; //jal x1 0xC
+        assert (dut.Instruction == 32'hFFDFF0EF) else $error("JAL Instruction Test Failed. Expected FFDFF0EF, got %h", dut.Instruction);
+        assert (dut.pc == 32'h00000050) else $error("JAL Instruction Test Failed. PC Expected 00000050, got %h", dut.pc);
+        assert (dut.registers.reg_array[1] == 32'h00000048) else $error("JAL Instruction Test Failed. Register x1 Expected 00000048, got %h", dut.registers.reg_array[1]);
+
+        @(posedge clk); #0.1; //jal x1 -0x4
+        assert (dut.Instruction == 32'h00C000EF) else $error("JAL Instruction Test Failed. Expected 00C000EF, got %h", dut.Instruction);
+        assert (dut.pc == 32'h0000004C) else $error("JAL Instruction Test Failed. PC Expected 0000004C, got %h", dut.pc);
+        assert (dut.registers.reg_array[1] == 32'h00000054) else $error("JAL Instruction Test Failed. Register x1 Expected 00000054, got %h", dut.registers.reg_array[1]);
+
+        @(posedge clk); #0.1; //jal x1 0xC
+        assert (dut.Instruction == 32'h00C02383) else $error("JAL Instruction Test Failed. Expected 00C02383, got %h", dut.Instruction);
+        assert (dut.pc == 32'h00000058) else $error("JAL Instruction Test Failed. PC Expected 00000058, got %h", dut.pc);
+        assert (dut.registers.reg_array[1] == 32'h00000050) else $error("JAL Instruction Test Failed. Register x1 Expected 00000050, got %h", dut.registers.reg_array[1]);
+
+        @(posedge clk); #0.1; //lw x7 0xC(x0)
+        assert (dut.registers.reg_array[7] == 32'hAFAFAFAF) else $error("JAL Instruction Test Failed. Register x7 Expected AFAFAFAF, got %h", dut.registers.reg_array[7]);
+        $display("J-type JAL Instruction Test done");
 
         $display("CPU instruction tests complete");
         $finish;

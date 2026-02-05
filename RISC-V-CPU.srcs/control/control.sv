@@ -71,7 +71,6 @@ module control(
                 mem_write = 1'b0;
                 imm_source = 2'b00;
                 alu_op = 2'b00;
-                reg_write = 1'b0;
                 alu_source = 1'b0;
             end
         endcase
@@ -95,5 +94,7 @@ module control(
     end
 
     //PC Source Logic
-    assign pc_source = (branch & alu_zero) | jump;
+    logic assert_branch;
+    assign assert_branch = branch & alu_zero;
+    assign pc_source = (assert_branch & (op == 7'b1100011)) | jump;
 endmodule
