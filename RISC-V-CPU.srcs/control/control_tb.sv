@@ -44,7 +44,7 @@ module control_tb();
                 func7 = 7'bxxxxxxxx;
                 alu_zero = 1'bx;
                 #1;
-                $display("- Set Inputs to X");
+                $display("\n- Set Inputs to X");
             end
         endtask
 
@@ -82,6 +82,23 @@ module control_tb();
             test_num = 3;
             set_default_vals();
             #1;
+            op = 7'b0010011; // I-type ALU
+            func3 = 3'b000; // ADDI
+            #1;
+            $display("Test I-type ALU (ADDI) Instruction:");
+            assert (alu_control === 3'b000) else $error("Assertion failed: alu_control != 000 (Got %b)", alu_control);
+            assert (imm_source  === 2'b00)  else $error("Assertion failed: imm_source != 00 (Got %b)", imm_source);
+            assert (mem_write   === 1'b0)   else $error("Assertion failed: mem_write != 0 (Got %b)", mem_write);
+            assert (reg_write   === 1'b1)   else $error("Assertion failed: reg_write != 1 (Got %b)", reg_write);
+            assert (alu_source   === 1'b1)   else $error("Assertion failed: alu_source != 1 (Got %b)", alu_source);
+            assert (write_back_source   === 2'b00)   else $error("Assertion failed: write_back_source != 0 (Got %b)", write_back_source);
+            assert (pc_source   === 1'b0)   else $error("Assertion failed: pc_source != 0 (Got %b)", pc_source);
+            $display("--> I-type ALU (ADDI) Instruction Test done");
+            
+
+            test_num = 4;
+            set_default_vals();
+            #1;
             op = 7'b0110011; // R-type ADD
             func3 = 3'b000;
             #1;
@@ -94,7 +111,7 @@ module control_tb();
             assert (pc_source   === 1'b0)   else $error("Assertion failed: pc_source != 0 (Got %b)", pc_source);
             $display("--> R-type ADD Instruction Test done");
 
-            test_num = 4;
+            test_num = 5;
             set_default_vals();
             #1;
             op = 7'b0110011; // R-type AND
@@ -109,7 +126,7 @@ module control_tb();
             assert (pc_source   === 1'b0)   else $error("Assertion failed: pc_source != 0 (Got %b)", pc_source);
             $display("--> R-type AND Instruction Test done");
 
-            test_num = 5;
+            test_num = 6;
             set_default_vals();
             #1;
             op = 7'b0110011; // R-type OR
@@ -124,7 +141,7 @@ module control_tb();
             assert (pc_source   === 1'b0)   else $error("Assertion failed: pc_source != 0 (Got %b)", pc_source);
             $display("--> R-type OR Instruction Test done");
 
-            test_num = 6;
+            test_num = 7;
             set_default_vals();
             #1;
             op = 7'b1100011; // B-type BEQ
@@ -141,16 +158,18 @@ module control_tb();
             assert (branch   === 1'b1)   else $error("Assertion failed: branch != 1 (Got %b)", branch);
             $display("--> B-type BEQ Instruction Test (Not Taken) done");
 
-            test_num = 7;
+            test_num = 8;
             set_default_vals();
             #1;
+            op = 7'b1100011; // B-type BEQ
+            func3 = 3'b000;
             alu_zero = 1'b1;
             #1;
             $display("Test B-type BEQ Instruction (Taken):");
             assert (pc_source   === 1'b1)   else $error("Assertion failed: pc_source != 1 (Got %b)", pc_source);
             $display("--> B-type BEQ Instruction Test (Taken) done");
 
-            test_num = 8;
+            test_num = 9;
             set_default_vals();
             #1;
             op = 7'b1101111; // J-type JAL

@@ -31,6 +31,16 @@ module control(
                 branch = 1'b0;
                 jump = 1'b0;
             end
+            7'b0010011: begin //I-type ALU
+                reg_write = 1'b1;
+                mem_write = 1'b0;
+                imm_source = 2'b00;
+                alu_op = 2'b10;
+                alu_source = 1'b1; //immediate
+                write_back_source = 2'b00; //alu result
+                branch = 1'b0;
+                jump = 1'b0;
+            end
             7'b0100011: begin //S-type
                 reg_write = 1'b0;
                 mem_write = 1'b1;
@@ -72,6 +82,9 @@ module control(
                 imm_source = 2'b00;
                 alu_op = 2'b00;
                 alu_source = 1'b0;
+                branch = 1'b0;
+                jump = 1'b0;
+                write_back_source = 2'b00;
             end
         endcase
     end
