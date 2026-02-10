@@ -55,7 +55,7 @@ module control_tb();
             #1;
             op = 7'b0000011; // lw
             #1;
-            $display("Test LW Instruction:");
+            $display("Test I-type LW Instruction:");
             assert (alu_control === 3'b000) else $error("Assertion failed: alu_control != 000 (Got %b)", alu_control);
             assert (imm_source  === 2'b00)  else $error("Assertion failed: imm_source != 00 (Got %b)", imm_source);
             assert (mem_write   === 1'b0)   else $error("Assertion failed: mem_write != 1 (Got %b)", mem_write);
@@ -63,21 +63,21 @@ module control_tb();
             assert (alu_source   === 1'b1)   else $error("Assertion failed: alu_source != 1 (Got %b)", alu_source);
             assert (write_back_source   === 2'b01)   else $error("Assertion failed: write_back_source != 1 (Got %b)", write_back_source);
             assert (pc_source   === 1'b0)   else $error("Assertion failed: pc_source != 0 (Got %b)", pc_source);
-            $display("--> LW Instruction Test done");
+            $display("--> I-type LW Instruction Test done");
             
             test_num = 2;
             set_default_vals();
             #1;
             op = 7'b0100011; // sw
             #1;
-            $display("Test SW Instruction:");
+            $display("Test I-type SW Instruction:");
             assert (alu_control === 3'b000) else $error("Assertion failed: alu_control != 000 (Got %b)", alu_control);
             assert (imm_source  === 2'b01)  else $error("Assertion failed: imm_source != 01 (Got %b)", imm_source);
             assert (mem_write   === 1'b1)   else $error("Assertion failed: mem_write != 1 (Got %b)", mem_write);
             assert (reg_write   === 1'b0)   else $error("Assertion failed: reg_write != 0 (Got %b)", reg_write);
             assert (alu_source   === 1'b1)   else $error("Assertion failed: alu_source != 1 (Got %b)", alu_source);
             assert (pc_source   === 1'b0)   else $error("Assertion failed: pc_source != 0 (Got %b)", pc_source);
-            $display("--> SW Instruction Test done");
+            $display("--> I-type SW Instruction Test done");
 
             test_num = 3;
             set_default_vals();
