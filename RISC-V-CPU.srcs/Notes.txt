@@ -107,3 +107,18 @@ Branch    | BGEU        | Registers (rs1, rs2)      | PC                | Branch
 Category  | Instruction | Source (From)  | Destination (To)     | Description
 ------------------------------------------------------------------------------------------------
 Jump      |    JAL      | PC (Current)   | rd (return Address)  | Stores PC + 4 into register rd
+
+——————————————————————————————————————————————————————————————
+——————————————————————————— U-Type ———————————————————————————
+——————————————————————————————————————————————————————————————
+
+31                                    12 11        7 6            0
++---------------------------------------+-----------+-------------+
+|              imm[31:12]               |    rd     |    opcode   |
++---------------------------------------+-----------+-------------+
+                 20 bits                   5 bits        7 bits
+
+Category  | Instruction | Source (From)       | Destination (To)      | Description
+----------------------------------------------------------------------------------------------------------------
+Load      |     LUI     | imm << 12           | rd (Register)         | Loads 20-bit immediate into upper 20 bits
+PC-Rel    |    AUIPC    | PC + (imm << 12)    | rd (Register)         | Adds upper immediate to PC, stores in rd
