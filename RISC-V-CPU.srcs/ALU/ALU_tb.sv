@@ -88,16 +88,16 @@ module ALU_tb;
         end
         $display("Test 4 done.");
 
-        //SLT (signed) operation test
-        $display("--> Test 5: SLT (signed) operation");
+        //SLTI operation test
+        $display("--> Test 5: SLTI operation");
         test_num = 5;
-        alu_control = 3'b101; //SLT (signed)
+        alu_control = 3'b101; //SLTI
         for(int i = 0; i < 1000; i++) begin
             operand1 = $urandom();
             operand2 = $urandom();
             expected = ($signed(operand1) < $signed(operand2)) ? 32'b1 : 32'b0;
             #1;
-            assert (alu_result === expected) else $error("Test Failed: SLT operation incorrect for operands %0d and %0d. Expected %0d, got %0d", $signed(operand1), $signed(operand2), expected, alu_result);
+            assert (alu_result === expected) else $error("Test Failed: SLTI operation incorrect for operands %0d and %0d. Expected %0d, got %0d", $signed(operand1), $signed(operand2), expected, alu_result);
         end
         $display("Test 5 done.");
 

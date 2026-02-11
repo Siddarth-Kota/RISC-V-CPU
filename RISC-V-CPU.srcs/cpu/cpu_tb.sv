@@ -152,7 +152,7 @@ module cpu_tb;
         $display("J-type JAL Instruction Test done");
 
 
-        $display("\n--> I-type ALU ADDI Instruction Test");
+        $display("\n--> I-type ADDI Instruction Test");
         test_num = 8;
         assert(dut.Instruction == 32'h1AB38D13) else $error("ADDI Instruction Test Failed. Expected 1AB38D13, got %h", dut.Instruction);
         assert(dut.registers.reg_array[26] != 32'hAFAFB15A) else $error("ADDI Instruction Test Failed. Register x26 should not be AFAFB15A, got %h", dut.registers.reg_array[26]);
@@ -161,10 +161,10 @@ module cpu_tb;
         assert(dut.registers.reg_array[26] == 32'hAFAFB15A) else $error("ADDI Instruction Test Failed. Register x26: Expected AFAFB15A, got %h", dut.registers.reg_array[26]);
         @(posedge clk); #0.1; //addi x25 x6 0xF21 (negative immediate)
         assert(dut.registers.reg_array[25] == 32'hBCBCBBDD) else $error("ADDI Instruction Test Failed. Register x25: Expected BCBCBBDD, got %h", dut.registers.reg_array[25]);
-        $display("I-type ALU ADDI Instruction Test done");
+        $display("I-type ADDI Instruction Test done");
 
 
-        $display("\n--> U-type LUI Instruction Test");
+        $display("\n--> U-type AUIPC Instruction Test");
         test_num = 9;
         assert(dut.Instruction == 32'h1F1FA297) else $error("AUIPC Instruction Test Failed. Expected 1F1FA297, got %h", dut.Instruction);
         @(posedge clk); #0.1; //auipc x5 0x1F1FA
@@ -179,6 +179,18 @@ module cpu_tb;
         @(posedge clk); #0.1; //lui x5 0x2F2FA
         assert(dut.registers.reg_array[5] == 32'h2F2FA000) else $error("LUI Instruction Test Failed. Register x5: Expected 2F2FA000, got %h", dut.registers.reg_array[5]);
         $display("U-type LUI Instruction Test done");
+
+
+        $display("\n--> I-type SLTI Instruction Test");
+        test_num = 11;
+        assert(dut.registers.reg_array[19] == 32'h12341234) else $error("SLTI Instruction Test Failed. Register x19: Expected 12341234, got %h", dut.registers.reg_array[19]);
+        assert(dut.Instruction == 32'hFFF9AB93) else $error("SLTI Instruction Test Failed. Expected FFF9AB93, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //slti x23 x19 0xFFF (negative immediate)
+        assert(dut.registers.reg_array[23] == 32'h00000000) else $error("SLTI Instruction Test Failed. Register x23: Expected 0, got %h", dut.registers.reg_array[23]);
+        @(posedge clk); #0.1; //slti x23 x23 0x001 (positive immediate)
+        assert(dut.registers.reg_array[23] == 32'h00000001) else $error("SLTI Instruction Test Failed. Register x23: Expected 1, got %h", dut.registers.reg_array[23]);
+        $display("I-type SLTI Instruction Test done");
+
 
         $display("\n--> CPU instruction tests complete");
         $finish;
