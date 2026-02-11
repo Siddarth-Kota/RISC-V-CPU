@@ -3,7 +3,7 @@
 module signextender_tb;
 
     logic [24:0] raw_src;
-    logic [1:0] imm_source;
+    logic [2:0] imm_source;
     logic [31:0] immediate;
 
     //debug
@@ -23,7 +23,7 @@ module signextender_tb;
         test_num = 1;
         $display("--> Testing Positive I-type Immediate (123)");
         raw_src = {12'd123, 13'b1_0101_0101_0101}; //I-type immediate = 123
-        imm_source = 2'b00; //I-type
+        imm_source = 3'b000; //I-type
         #1;
         assert (immediate == 32'b0000_0000_0000_0000_0000_0000_0111_1011) else $error("Test %d Failed: Expected 123, got %d", test_num, immediate);
         assert (immediate == 32'd123) else $error("Test %d Failed: Expected 123, got %d", test_num, immediate);
@@ -33,7 +33,7 @@ module signextender_tb;
         
         $display("--> Testing Negative I-type Immediate (-45)");
         raw_src = {-12'sd45, 13'b1_0101_0101_0101};
-        imm_source = 2'b00; //I-type
+        imm_source = 3'b000; //I-type
         #1;
         assert (immediate == 32'b1111_1111_1111_1111_1111_1111_1101_0011) else $error("Test %d Failed: Expected -45, got %d", test_num, immediate);
         assert (signed'(immediate) == -45) else $error("Test %d Failed: Expected -45, got %d", test_num, immediate);
@@ -41,7 +41,7 @@ module signextender_tb;
 
         test_num = 3;
         $display("--> Testing S-type Immediate");
-        imm_source = 2'b01; //S-type
+        imm_source = 3'b001; //S-type
         for (int i = 0; i < 100; i++) begin
             logic [11:0] rand_imm = $urandom();
             raw_src = {rand_imm[11:5],13'hAFAF,rand_imm[4:0]}; //S-type immediate
@@ -52,7 +52,7 @@ module signextender_tb;
 
         test_num = 4;
         $display("--> Testing B-type Immediate");
-        imm_source = 2'b10; //B-type
+        imm_source = 3'b010; //B-type
         for (int i = 0; i < 100; i++) begin
             logic [12:0] random_imm = $urandom() & 13'h1FFE; //make sure LSB is 0
             raw_src = 32'(random_imm[12]) << 24 | 32'(random_imm[11]) << 0 | 32'(random_imm[10:5]) << 18 | 32'(random_imm[4:1]) << 1;
@@ -63,7 +63,7 @@ module signextender_tb;
 
         test_num = 5;
         $display("--> Testing J-type Immediate");
-        imm_source = 2'b11; //J-type
+        imm_source = 3'b011; //J-type
         for (int i = 0; i < 100; i++) begin
             logic [20:0] random_imm = $urandom() & 21'h1FFFFE; //make sure LSB is 0
             raw_src = 32'(random_imm[20]) << 24 | 32'(random_imm[19:12]) << 5 | 32'(random_imm[11]) << 13 | 32'(random_imm[10:1]) << 14;
@@ -71,6 +71,18 @@ module signextender_tb;
             assert (immediate == {{11{random_imm[20]}}, random_imm}) else $error("Test %d Failed: Expected %d, got %d", test_num, {{11{random_imm[20]}}, random_imm}, immediate);
         end
         $display("J-type Immediate Test done");
+
+        test_num = 6;
+        $display("--> Testing U-type Immediate");
+        imm_source = 3'b100; //U-type
+        for (int i = 0; i < 100; i++) begin
+            logic [19:0] random_imm = $urandom() & 20'hFFFFF; //20-bit immediate
+            logic [4:0] waste = $urandom() & 5'h1F; //random bits to test unused bits are ignored
+            raw_src = (32'(random_imm) << 5) | 32'(waste); //U-type immediate is in bits [24:5], bits [4:0] should be ignored
+            #1;
+            assert (immediate == {random_imm, 12'b0}) else $error("Test %d Failed: Expected %d, got %d", test_num, {random_imm, 12'b0}, immediate);
+        end
+        $display("U-type Immediate Test done");
         
         $display("All tests done");
         $finish;
