@@ -2,7 +2,7 @@
 
 module ALU_tb;
 
-    logic [2:0] alu_control;
+    logic [3:0] alu_control;
     logic [31:0] operand1;
     logic [31:0] operand2;
     logic [31:0] alu_result;
@@ -39,7 +39,7 @@ module ALU_tb;
         //ADD operation test
         $display("--> Test 1: ADD operation");
         test_num = 1;
-        alu_control = 3'b000; //ADD
+        alu_control = 4'b0000; //ADD
         for(int i = 0; i < 1000; i++) begin
             operand1 = $urandom();
             operand2 = $urandom();
@@ -52,7 +52,7 @@ module ALU_tb;
         //AND operation test
         $display("--> Test 2: AND operation");
         test_num = 2;
-        alu_control = 3'b010; //AND
+        alu_control = 4'b0010; //AND
         for(int i = 0; i < 1000; i++) begin
             operand1 = $urandom();
             operand2 = $urandom();
@@ -65,7 +65,7 @@ module ALU_tb;
         //OR operation test
         $display("--> Test 3: OR operation");
         test_num = 3;
-        alu_control = 3'b011; //OR
+        alu_control = 4'b0011; //OR
         for(int i = 0; i < 1000; i++) begin
             operand1 = $urandom();
             operand2 = $urandom();
@@ -78,7 +78,7 @@ module ALU_tb;
         //SUB operation test
         $display("--> Test 4: SUB operation");
         test_num = 4;
-        alu_control = 3'b001; //SUB
+        alu_control = 4'b0001; //SUB
         for(int i = 0; i < 1000; i++) begin
             operand1 = $urandom();
             operand2 = $urandom();
@@ -91,7 +91,7 @@ module ALU_tb;
         //SLTI operation test
         $display("--> Test 5: SLTI operation");
         test_num = 5;
-        alu_control = 3'b101; //SLTI
+        alu_control = 4'b0101; //SLTI
         for(int i = 0; i < 1000; i++) begin
             operand1 = $urandom();
             operand2 = $urandom();
@@ -104,7 +104,7 @@ module ALU_tb;
         //SLTU operation test
         $display("--> Test 6: SLTU operation");
         test_num = 6;
-        alu_control = 3'b111; //SLTU
+        alu_control = 4'b0111; //SLTU
         for(int i = 0; i < 1000; i++) begin
             operand1 = $urandom();
             operand2 = $urandom();
@@ -113,6 +113,19 @@ module ALU_tb;
             assert (alu_result === expected) else $error("Test Failed: SLTU operation incorrect for operands %0d and %0d. Expected %0d, got %0d", operand1, operand2, expected, alu_result);
         end
         $display("Test 6 done.");
+
+        //XOR operation test
+        $display("--> Test 7: XOR operation");
+        test_num = 7;
+        alu_control = 4'b1000; //XORI
+        for(int i = 0; i < 1000; i++) begin
+            operand1 = $urandom();
+            operand2 = $urandom();
+            expected = operand1 ^ operand2;
+            #1;
+            assert (alu_result === expected) else $error("Test Failed: XOR operation incorrect for operands %0d and %0d. Expected %0d, got %0d", operand1, operand2, expected, alu_result);
+        end
+        $display("Test 7 done.");
 
 
         test_num = 0;
