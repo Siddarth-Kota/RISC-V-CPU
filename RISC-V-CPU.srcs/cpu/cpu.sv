@@ -10,13 +10,19 @@ module cpu (
     logic [31:0] pc_next;
     logic [31:0] pc_target;
     logic [31:0] pc_plus4;
-    assign pc_target = pc + immediate;
     assign pc_plus4 = pc + 4;
 
     always_comb begin : pcSelect
         case (pc_source)
+            1'b0 : pc_next = pc_plus4; //next instruction
             1'b1 : pc_next = pc_target; //branch taken
-            default : pc_next = pc_plus4; //next instruction
+        endcase
+    end
+
+    always_comb begin : second_add_select
+        case (second_add_source)
+            1'b0 : pc_target = pc + immediate; //branch target
+            1'b1 : pc_target = immediate; //jump target
         endcase
     end
 
@@ -59,6 +65,7 @@ module cpu (
     wire alu_source;
     wire [1:0] write_back_source;
     wire pc_source;
+    wire second_add_source;
     wire branch;
     wire jump;
 
@@ -74,8 +81,9 @@ module cpu (
         .reg_write(reg_write),
         .alu_source(alu_source),
         .write_back_source(write_back_source),
-
         .pc_source(pc_source),
+        .second_add_source(second_add_source),
+
         .branch(branch),
         .jump(jump)  
     );
@@ -93,6 +101,7 @@ module cpu (
             2'b00 : write_data = alu_result;
             2'b01 : write_data = mem_read;
             2'b10 : write_data = pc_plus4;
+            2'b11 : write_data = pc_target;
             default : write_data = alu_result;
         endcase
     end
