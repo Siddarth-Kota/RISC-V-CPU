@@ -47,7 +47,7 @@ module ALU_tb;
             #1;
             assert (alu_result === expected) else $error("Test Failed: ADD operation incorrect for operands %0d and %0d. Expected %0d, got %0d", operand1, operand2, expected, alu_result);
         end
-        $display("--> Test 1 done.");
+        $display("Test 1 done.");
 
         //AND operation test
         $display("--> Test 2: AND operation");
@@ -60,7 +60,7 @@ module ALU_tb;
             #1;
             assert (alu_result === expected) else $error("Test Failed: AND operation incorrect for operands %0d and %0d. Expected %0d, got %0d", operand1, operand2, expected, alu_result);
         end
-        $display("--> Test 2 done.");
+        $display("Test 2 done.");
 
         //OR operation test
         $display("--> Test 3: OR operation");
@@ -73,7 +73,7 @@ module ALU_tb;
             #1;
             assert (alu_result === expected) else $error("Test Failed: OR operation incorrect for operands %0d and %0d. Expected %0d, got %0d", operand1, operand2, expected, alu_result);
         end
-        $display("--> Test 3 done.");
+        $display("Test 3 done.");
 
         //SUB operation test
         $display("--> Test 4: SUB operation");
@@ -86,7 +86,21 @@ module ALU_tb;
             #1
             assert (alu_result === expected) else $error("Test Failed: SUB operation incorrect for operands %0d and %0d. Expected %0d, got %0d", operand1, operand2, expected, alu_result);
         end
-        $display("--> Test 4 done.");
+        $display("Test 4 done.");
+
+        //SLT (signed) operation test
+        $display("--> Test 5: SLT (signed) operation");
+        test_num = 5;
+        alu_control = 3'b101; //SLT (signed)
+        for(int i = 0; i < 1000; i++) begin
+            operand1 = $urandom();
+            operand2 = $urandom();
+            expected = ($signed(operand1) < $signed(operand2)) ? 32'b1 : 32'b0;
+            #1;
+            assert (alu_result === expected) else $error("Test Failed: SLT operation incorrect for operands %0d and %0d. Expected %0d, got %0d", $signed(operand1), $signed(operand2), expected, alu_result);
+        end
+        $display("Test 5 done.");
+
 
         test_num = 0;
         //end of tests
