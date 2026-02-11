@@ -113,6 +113,7 @@ module control(
                     3'b000 : alu_control = 3'b000; //ADD
                     3'b111 : alu_control = 3'b010; //AND
                     3'b110 : alu_control = 3'b011; //OR
+                    3'b010 : alu_control = 3'b101; //SLT (signed)
                     default: alu_control = 3'b111;
                 endcase
             end
