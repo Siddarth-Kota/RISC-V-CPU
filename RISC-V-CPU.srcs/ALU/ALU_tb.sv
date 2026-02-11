@@ -101,6 +101,19 @@ module ALU_tb;
         end
         $display("Test 5 done.");
 
+        //SLTU operation test
+        $display("--> Test 6: SLTU operation");
+        test_num = 6;
+        alu_control = 3'b111; //SLTU
+        for(int i = 0; i < 1000; i++) begin
+            operand1 = $urandom();
+            operand2 = $urandom();
+            expected = (operand1 < operand2) ? 32'b1 : 32'b0;
+            #1;
+            assert (alu_result === expected) else $error("Test Failed: SLTU operation incorrect for operands %0d and %0d. Expected %0d, got %0d", operand1, operand2, expected, alu_result);
+        end
+        $display("Test 6 done.");
+
 
         test_num = 0;
         //end of tests

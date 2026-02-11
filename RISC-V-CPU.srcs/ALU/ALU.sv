@@ -16,6 +16,7 @@ module ALU (
             3'b011 : alu_result = operand1 | operand2; //OR
             3'b001 : alu_result = operand1 + (~operand2 + 1'b1); //SUB
             3'b101 : alu_result = {31'b0, $signed(operand1) < $signed(operand2)}; //SLTI
+            3'b111 : alu_result = {31'b0, operand1 < operand2}; //SLTU
             default: alu_result = 32'b0;
         endcase
     end

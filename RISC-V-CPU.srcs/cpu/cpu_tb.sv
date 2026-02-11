@@ -191,6 +191,15 @@ module cpu_tb;
         assert(dut.registers.reg_array[23] == 32'h00000001) else $error("SLTI Instruction Test Failed. Register x23: Expected 1, got %h", dut.registers.reg_array[23]);
         $display("I-type SLTI Instruction Test done");
 
+        
+        $display("\n--> I-type SLTU Instruction Test");
+        test_num = 12;
+        assert(dut.Instruction == 32'hFFF9BB13) else $error("SLTU Instruction Test Failed. Expected FFF9BB13, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //sltu x22 x19 0xFFF
+        assert(dut.registers.reg_array[22] == 32'h00000001) else $error("SLTU Instruction Test Failed. Register x22: Expected 1, got %h", dut.registers.reg_array[22]);
+        @(posedge clk); #0.1; //sltu x22 x19 0x001
+        assert(dut.registers.reg_array[22] == 32'h00000000) else $error("SLTU Instruction Test Failed. Register x22: Expected 0, got %h", dut.registers.reg_array[22]);
+        $display("I-type SLTU Instruction Test done");
 
         $display("\n--> CPU instruction tests complete");
         $finish;

@@ -84,7 +84,7 @@ module control_tb();
             test_num = 3;
             set_default_vals();
             #1;
-            op = 7'b0010011; // I-type ALU
+            op = 7'b0010011; // I-type
             func3 = 3'b000; // ADDI
             #1;
             $display("Test I-type (ADDI) Instruction:");
@@ -221,7 +221,7 @@ module control_tb();
             test_num = 12;
             set_default_vals();
             #1;
-            op = 7'b0010011; // I-type ALU
+            op = 7'b0010011; // I-type
             func3 = 3'b010; // SLTI
             #1;
             $display("Test I-type (SLTI) Instruction:");
@@ -233,6 +233,22 @@ module control_tb();
             assert (write_back_source === 2'b00)   else $error("Assertion failed: write_back_source != 0 (Got %b)", write_back_source);
             assert (pc_source === 1'b0)   else $error("Assertion failed: pc_source != 0 (Got %b)", pc_source);
             $display("--> I-type (SLTI) Instruction Test done");
+
+            test_num = 13;
+            set_default_vals();
+            #1;
+            op = 7'b0010011; // I-type
+            func3 = 3'b011; // SLTU
+            #1;
+            $display("Test I-type (SLTU) Instruction:");
+            assert (alu_control === 3'b111) else $error("Assertion failed: alu_control != 111 (Got %b)", alu_control);
+            assert (imm_source === 3'b000)  else $error("Assertion failed: imm_source != 000 (Got %b)", imm_source);
+            assert (mem_write === 1'b0)   else $error("Assertion failed: mem_write != 0 (Got %b)", mem_write);
+            assert (reg_write === 1'b1)   else $error("Assertion failed: reg_write != 1 (Got %b)", reg_write);
+            assert (alu_source === 1'b1)   else $error("Assertion failed: alu_source != 1 (Got %b)", alu_source);
+            assert (write_back_source === 2'b00)   else $error("Assertion failed: write_back_source != 0 (Got %b)", write_back_source);
+            assert (pc_source === 1'b0)   else $error("Assertion failed: pc_source != 0 (Got %b)", pc_source);
+            $display("--> I-type (SLTU) Instruction Test done");
 
             test_num = 0;
             #10;
