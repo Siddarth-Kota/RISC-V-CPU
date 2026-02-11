@@ -59,7 +59,7 @@ module cpu (
     wire alu_zero;
 
     wire [2:0] alu_control;
-    wire [1:0] imm_source;
+    wire [2:0] imm_source;
     wire mem_write;
     wire reg_write;
     wire alu_source;

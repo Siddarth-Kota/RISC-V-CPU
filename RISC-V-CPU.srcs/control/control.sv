@@ -66,6 +66,7 @@ module control(
                 imm_source = 3'b010;
                 alu_op = 2'b01;
                 alu_source = 1'b0;
+                second_add_source = 1'b0;
                 branch = 1'b1;
                 jump = 1'b0;
             end
@@ -74,6 +75,7 @@ module control(
                 imm_source = 3'b011;
                 mem_write = 1'b0;
                 write_back_source = 2'b10; //PC + 4
+                second_add_source = 1'b0;
                 branch = 1'b0;
                 jump = 1'b1;
             end

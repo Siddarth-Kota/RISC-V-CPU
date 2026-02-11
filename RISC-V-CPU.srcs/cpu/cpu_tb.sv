@@ -31,7 +31,7 @@ module cpu_tb;
     endtask
 
     initial begin
-        int check_limit = 5;
+        // int check_limit = 5;
 
         $readmemh("instr_mem_test.hex", expected_instr_mem);
 
@@ -163,7 +163,24 @@ module cpu_tb;
         assert(dut.registers.reg_array[25] == 32'hBCBCBBDD) else $error("ADDI Instruction Test Failed. Register x25: Expected BCBCBBDD, got %h", dut.registers.reg_array[25]);
         $display("I-type ALU ADDI Instruction Test done");
 
-        $display("\n--> CPU instruction tests complete");
+
+        $display("\n--> U-type LUI Instruction Test");
+        test_num = 10;
+        assert(dut.Instruction == 32'h1F1FA297) else $error("AUIPC Instruction Test Failed. Expected 1F1FA297, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //auipc x5 0x1F1FA
+        assert(dut.registers.reg_array[5] == 32'h1F1FA064) else $error("AUIPC Instruction Test Failed. Register x5: Expected 1F1FA064, got %h", dut.registers.reg_array[5]);
+        assert(dut.pc == 32'h00000068) else $error("AUIPC Instruction Test Failed. PC Expected 00000068, got %h", dut.pc);
+        $display("U-type AUIPC Instruction Test done");
+
+
+        $display("\n--> U-type LUI Instruction Test");
+        test_num = 11;
+        assert(dut.Instruction == 32'h2F2FA2B7) else $error("LUI Instruction Test Failed. Expected 2F2FA2B7, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //lui x5 0x2F2FA
+        assert(dut.registers.reg_array[5] == 32'h2F2FA000) else $error("LUI Instruction Test Failed. Register x5: Expected 2F2FA000, got %h", dut.registers.reg_array[5]);
+        $display("U-type LUI Instruction Test done");
+
+        $display("\n--> CPU instruction tests complete\n");
         $finish;
     end
 endmodule
