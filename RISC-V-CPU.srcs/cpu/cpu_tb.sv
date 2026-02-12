@@ -63,12 +63,12 @@ module cpu_tb;
         $display("I-type LW Instruction Test done");
 
 
-        $display("\n--> Testing I-type SW Instruction");
+        $display("\n--> Testing S-type SW Instruction");
         test_num = 2;
         assert (dut.data_memory.mem_array[3] == 32'hF2F2F2F2) else $error("SW Initial Value Test Failed. Memory[3]: Expected F2F2F2F2, got %h", dut.data_memory.mem_array[3]);
         @(posedge clk); #0.1;
         assert (dut.data_memory.mem_array[3] == 32'hAFAFAFAF) else $error("SW Final Value Test Failed. Memory[3]: Expected AFAFAFAF, got %h", dut.data_memory.mem_array[3]);
-        $display("I-type SW Instruction Test done");
+        $display("S-type SW Instruction Test done");
 
 
         $display("\n--> Testing R-type ADD Instruction");
@@ -230,6 +230,7 @@ module cpu_tb;
         @(posedge clk); #0.1; //andi x29 x19 0x800
         assert(dut.registers.reg_array[29] == 32'hEDCBE800) else $error("ANDI Instruction Test Failed. Register x29: Expected EDCBE800, got %h", dut.registers.reg_array[29]);
         $display("I-type ANDI Instruction Test done");
+
 
         $display("\n--> CPU instruction tests complete");
         $finish;

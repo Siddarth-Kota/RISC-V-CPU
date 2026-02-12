@@ -107,15 +107,17 @@ module control(
     //ALU Decoder
     always_comb begin
         case (alu_op)
-            2'b00 : alu_control = 3'b000; //LW,SW: ADD
+            2'b00 : alu_control = 4'b0000; //LW,SW: ADD
             2'b10 : begin //R-type and I-type ALU
                 case(func3)
                     3'b000 : alu_control = 4'b0000; //ADD
-                    3'b111 : alu_control = 4'b0010; //AND
-                    3'b110 : alu_control = 4'b0011; //OR
-                    3'b010 : alu_control = 4'b0101; //SLTI
+                    3'b001 : alu_control = 4'b1000; //SLL
+                    3'b010 : alu_control = 4'b0101; //SLT
                     3'b011 : alu_control = 4'b0111; //SLTU
-                    3'b100 : alu_control = 4'b1000; //XORI
+                    3'b100 : alu_control = 4'b1000; //XOR
+
+                    3'b110 : alu_control = 4'b0011; //OR
+                    3'b111 : alu_control = 4'b0010; //AND
                 endcase
             end
             2'b01 : alu_control = 4'b0001; //BEQ: SUB

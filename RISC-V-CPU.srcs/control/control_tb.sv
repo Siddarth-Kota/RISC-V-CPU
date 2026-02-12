@@ -55,9 +55,9 @@ module control_tb();
             test_num = 1;
             set_default_vals();
             #1;
-            op = 7'b0000011; // LW
+            op = 7'b0000011; // I-type LW
             #1;
-            $display("Test LW Instruction:");
+            $display("Test I-type LW Instruction:");
             assert (alu_control === 4'b0000) else $error("Assertion failed: alu_control != 0000 (Got %b)", alu_control);
             assert (imm_source === 3'b000)  else $error("Assertion failed: imm_source != 000 (Got %b)", imm_source);
             assert (mem_write === 1'b0)   else $error("Assertion failed: mem_write != 1 (Got %b)", mem_write);
@@ -65,29 +65,29 @@ module control_tb();
             assert (alu_source === 1'b1)   else $error("Assertion failed: alu_source != 1 (Got %b)", alu_source);
             assert (write_back_source === 2'b01)   else $error("Assertion failed: write_back_source != 01 (Got %b)", write_back_source);
             assert (pc_source === 1'b0)   else $error("Assertion failed: pc_source != 0 (Got %b)", pc_source);
-            $display("--> LW Instruction Test done");
+            $display("--> I-type LW Instruction Test done");
             
             test_num = 2;
             set_default_vals();
             #1;
-            op = 7'b0100011; // SW
+            op = 7'b0100011; // S-type SW
             #1;
-            $display("Test SW Instruction:");
+            $display("Test S-type SW Instruction:");
             assert (alu_control === 4'b0000) else $error("Assertion failed: alu_control != 0000 (Got %b)", alu_control);
             assert (imm_source === 3'b001)  else $error("Assertion failed: imm_source != 001 (Got %b)", imm_source);
             assert (mem_write === 1'b1)   else $error("Assertion failed: mem_write != 1 (Got %b)", mem_write);
             assert (reg_write === 1'b0)   else $error("Assertion failed: reg_write != 0 (Got %b)", reg_write);
             assert (alu_source === 1'b1)   else $error("Assertion failed: alu_source != 1 (Got %b)", alu_source);
             assert (pc_source === 1'b0)   else $error("Assertion failed: pc_source != 0 (Got %b)", pc_source);
-            $display("--> SW Instruction Test done");
+            $display("--> S-type SW Instruction Test done");
 
             test_num = 3;
             set_default_vals();
             #1;
-            op = 7'b0010011; // I-type
+            op = 7'b0010011; // I-type ALU
             func3 = 3'b000; // ADDI
             #1;
-            $display("Test I-type (ADDI) Instruction:");
+            $display("Test I-type ALU (ADDI) Instruction:");
             assert (alu_control === 4'b0000) else $error("Assertion failed: alu_control != 0000 (Got %b)", alu_control);
             assert (imm_source === 3'b000)  else $error("Assertion failed: imm_source != 000 (Got %b)", imm_source);
             assert (mem_write === 1'b0)   else $error("Assertion failed: mem_write != 0 (Got %b)", mem_write);
@@ -95,7 +95,7 @@ module control_tb();
             assert (alu_source === 1'b1)   else $error("Assertion failed: alu_source != 1 (Got %b)", alu_source);
             assert (write_back_source === 2'b00)   else $error("Assertion failed: write_back_source != 0 (Got %b)", write_back_source);
             assert (pc_source === 1'b0)   else $error("Assertion failed: pc_source != 0 (Got %b)", pc_source);
-            $display("--> I-type (ADDI) Instruction Test done");
+            $display("--> I-type ALU (ADDI) Instruction Test done");
             
 
             test_num = 4;
@@ -221,10 +221,10 @@ module control_tb();
             test_num = 12;
             set_default_vals();
             #1;
-            op = 7'b0010011; // I-type
+            op = 7'b0010011; // I-type ALU
             func3 = 3'b010; // SLTI
             #1;
-            $display("Test I-type (SLTI) Instruction:");
+            $display("Test I-type ALU (SLTI) Instruction:");
             assert (alu_control === 4'b0101) else $error("Assertion failed: alu_control != 0101 (Got %b)", alu_control);
             assert (imm_source === 3'b000)  else $error("Assertion failed: imm_source != 000 (Got %b)", imm_source);
             assert (mem_write === 1'b0)   else $error("Assertion failed: mem_write != 0 (Got %b)", mem_write);
@@ -232,15 +232,15 @@ module control_tb();
             assert (alu_source === 1'b1)   else $error("Assertion failed: alu_source != 1 (Got %b)", alu_source);
             assert (write_back_source === 2'b00)   else $error("Assertion failed: write_back_source != 0 (Got %b)", write_back_source);
             assert (pc_source === 1'b0)   else $error("Assertion failed: pc_source != 0 (Got %b)", pc_source);
-            $display("--> I-type (SLTI) Instruction Test done");
+            $display("--> I-type ALU (SLTI) Instruction Test done");
 
             test_num = 13;
             set_default_vals();
             #1;
-            op = 7'b0010011; // I-type
+            op = 7'b0010011; // I-type ALU
             func3 = 3'b011; // SLTU
             #1;
-            $display("Test I-type (SLTU) Instruction:");
+            $display("Test I-type ALU (SLTU) Instruction:");
             assert (alu_control === 4'b0111) else $error("Assertion failed: alu_control != 0111 (Got %b)", alu_control);
             assert (imm_source === 3'b000)  else $error("Assertion failed: imm_source != 000 (Got %b)", imm_source);
             assert (mem_write === 1'b0)   else $error("Assertion failed: mem_write != 0 (Got %b)", mem_write);
@@ -248,15 +248,15 @@ module control_tb();
             assert (alu_source === 1'b1)   else $error("Assertion failed: alu_source != 1 (Got %b)", alu_source);
             assert (write_back_source === 2'b00)   else $error("Assertion failed: write_back_source != 0 (Got %b)", write_back_source);
             assert (pc_source === 1'b0)   else $error("Assertion failed: pc_source != 0 (Got %b)", pc_source);
-            $display("--> I-type (SLTU) Instruction Test done");
+            $display("--> I-type ALU (SLTU) Instruction Test done");
 
             test_num = 14;
             set_default_vals();
             #1;
-            op = 7'b0010011; // I-type
+            op = 7'b0010011; // I-type ALU
             func3 = 3'b100; // XORI
             #1;
-            $display("Test I-type (XORI) Instruction:");
+            $display("Test I-type ALU (XORI) Instruction:");
             assert (alu_control === 4'b1000) else $error("Assertion failed: alu_control != 1000 (Got %b)", alu_control);
             assert (imm_source === 3'b000)  else $error("Assertion failed: imm_source != 000 (Got %b)", imm_source);
             assert (mem_write === 1'b0)   else $error("Assertion failed: mem_write != 0 (Got %b)", mem_write);
@@ -264,15 +264,15 @@ module control_tb();
             assert (alu_source === 1'b1)   else $error("Assertion failed: alu_source != 1 (Got %b)", alu_source);
             assert (write_back_source === 2'b00)   else $error("Assertion failed: write_back_source != 0 (Got %b)", write_back_source);
             assert (pc_source === 1'b0)   else $error("Assertion failed: pc_source != 0 (Got %b)", pc_source);
-            $display("--> I-type (XORI) Instruction Test done");
+            $display("--> I-type ALU (XORI) Instruction Test done");
 
             test_num = 15;
             set_default_vals();
             #1;
-            op = 7'b0010011; // I-type
+            op = 7'b0010011; // I-type ALU
             func3 = 3'b110; // ORI
             #1;
-            $display("Test I-type (ORI) Instruction:");
+            $display("Test I-type ALU (ORI) Instruction:");
             assert (alu_control === 4'b0011) else $error("Assertion failed: alu_control != 0011 (Got %b)", alu_control);
             assert (imm_source === 3'b000)  else $error("Assertion failed: imm_source != 000 (Got %b)", imm_source);
             assert (mem_write === 1'b0)   else $error("Assertion failed: mem_write != 0 (Got %b)", mem_write);
@@ -280,15 +280,15 @@ module control_tb();
             assert (alu_source === 1'b1)   else $error("Assertion failed: alu_source != 1 (Got %b)", alu_source);
             assert (write_back_source === 2'b00)   else $error("Assertion failed: write_back_source != 0 (Got %b)", write_back_source);
             assert (pc_source === 1'b0)   else $error("Assertion failed: pc_source != 0 (Got %b)", pc_source);
-            $display("--> I-type (ORI) Instruction Test done");
+            $display("--> I-type ALU (ORI) Instruction Test done");
 
             test_num = 16;
             set_default_vals();
             #1;
-            op = 7'b0010011; // I-type
+            op = 7'b0010011; // I-type ALU
             func3 = 3'b111; // ANDI
             #1;
-            $display("Test I-type (ANDI) Instruction:");
+            $display("Test I-type ALU (ANDI) Instruction:");
             assert (alu_control === 4'b0010) else $error("Assertion failed: alu_control != 0010 (Got %b)", alu_control);
             assert (imm_source === 3'b000)  else $error("Assertion failed: imm_source != 000 (Got %b)", imm_source);
             assert (mem_write === 1'b0)   else $error("Assertion failed: mem_write != 0 (Got %b)", mem_write);
@@ -296,7 +296,7 @@ module control_tb();
             assert (alu_source === 1'b1)   else $error("Assertion failed: alu_source != 1 (Got %b)", alu_source);
             assert (write_back_source === 2'b00)   else $error("Assertion failed: write_back_source != 0 (Got %b)", write_back_source);
             assert (pc_source === 1'b0)   else $error("Assertion failed: pc_source != 0 (Got %b)", pc_source);
-            $display("--> I-type (ANDI) Instruction Test done");
+            $display("--> I-type ALU (ANDI) Instruction Test done");
 
             test_num = 0;
             #10;
