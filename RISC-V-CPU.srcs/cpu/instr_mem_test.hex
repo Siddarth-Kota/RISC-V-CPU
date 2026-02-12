@@ -29,11 +29,12 @@ FFF9AB93  //SLTI TEST START  :      slti x23 x19 0xFFF              | x23 <= 000
 001BAB93  //                        slti x23 x23 0x001              | x23 <= 00000001
 FFF9BB13  //SLTIU TEST START :      sltiu x22 x19 0xFFF             | x22 <= 00000001
 0019BB13  //                        sltiu x22 x19 0x001             | x22 <= 00000000
-AAA9C913  //XORI TEST START  :      xori x18 x19 0xAAA              | x18 <= EDCBE89E (AAA was sign-extended to FFFFFAAA)
+AAA9C913  //XORI TEST START  :      xori x18 x19 0xAAA              | x18 <= EDCBE89E
 00094993  //                        xori x19 x18 0x000              | x19 <= EDCBE89E
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
+48F9E813  //ORI TEST START   :      ori x16 x19 0x48F               | x16 <= EDCBEC9F
+F0F9E893  //                        ori x17 x19 0xF0F               | x17 <= FFFFFF9F
+07F9FE13  //ANDI TEST START  :      andi x28 x19 0x07F              | x28 <= 0000001E
+8009FE93  //                        andi x29 x19 0x800              | x29 <= EDCBE800
 00000013  //NOP
 00000013  //NOP
 00000013  //NOP

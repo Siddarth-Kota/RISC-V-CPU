@@ -6,7 +6,7 @@ module cpu_tb;
     logic rst_n;
 
     //debug
-    logic [3:0] test_num = 0;
+    logic [4:0] test_num = 0;
 
     cpu dut (
         .clk(clk),
@@ -210,6 +210,26 @@ module cpu_tb;
         @(posedge clk); #0.1; //xori x19 x18 0x000
         assert(dut.registers.reg_array[19] == 32'hEDCBE89E) else $error("XORI Instruction Test Failed. Register x19: Expected EDCBE89E, got %h", dut.registers.reg_array[19]);
         $display("I-type XORI Instruction Test done");
+
+
+        $display("\n--> I-type ORI Instruction Test");
+        test_num = 14;
+        assert(dut.Instruction == 32'h48F9E813) else $error("ORI Instruction Test Failed. Expected 48F9E813, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //ori x16 x19 0x48F
+        assert(dut.registers.reg_array[16] == 32'hEDCBEC9F) else $error("ORI Instruction Test Failed. Register x16: Expected EDCBEC9F, got %h", dut.registers.reg_array[16]);
+        @(posedge clk); #0.1; //ori x17 x19 0xF0F
+        assert(dut.registers.reg_array[17] == 32'hFFFFFF9F) else $error("ORI Instruction Test Failed. Register x17: Expected FFFFFF9F, got %h", dut.registers.reg_array[17]);
+        $display("I-type ORI Instruction Test done");
+
+
+        $display("\n--> I-type ANDI Instruction Test");
+        test_num = 15;
+        assert(dut.Instruction == 32'h07F9FE13) else $error("ANDI Instruction Test Failed. Expected 07F9FE13, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //andi x28 x19 0x07F
+        assert(dut.registers.reg_array[28] == 32'h0000001E) else $error("ANDI Instruction Test Failed. Register x28: Expected 0000001E, got %h", dut.registers.reg_array[28]);
+        @(posedge clk); #0.1; //andi x29 x19 0x800
+        assert(dut.registers.reg_array[29] == 32'hEDCBE800) else $error("ANDI Instruction Test Failed. Register x29: Expected EDCBE800, got %h", dut.registers.reg_array[29]);
+        $display("I-type ANDI Instruction Test done");
 
         $display("\n--> CPU instruction tests complete");
         $finish;

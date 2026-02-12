@@ -108,7 +108,7 @@ module control(
     always_comb begin
         case (alu_op)
             2'b00 : alu_control = 3'b000; //LW,SW: ADD
-            2'b10 : begin //R-type
+            2'b10 : begin //R-type and I-type ALU
                 case(func3)
                     3'b000 : alu_control = 4'b0000; //ADD
                     3'b111 : alu_control = 4'b0010; //AND
