@@ -201,6 +201,16 @@ module cpu_tb;
         assert(dut.registers.reg_array[22] == 32'h00000000) else $error("SLTU Instruction Test Failed. Register x22: Expected 0, got %h", dut.registers.reg_array[22]);
         $display("I-type SLTU Instruction Test done");
 
+        
+        $display("\n--> I-type XORI Instruction Test");
+        test_num = 13;
+        assert(dut.Instruction == 32'hAAA9C913) else $error("XORI Instruction Test Failed. Expected AAA9C913, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //xori x18 x19 0xAAA
+        assert(dut.registers.reg_array[18] == 32'hEDCBE89E) else $error("XORI Instruction Test Failed. Register x18: Expected EDCBE89E, got %h", dut.registers.reg_array[18]);
+        @(posedge clk); #0.1; //xori x19 x18 0x000
+        assert(dut.registers.reg_array[19] == 32'hEDCBE89E) else $error("XORI Instruction Test Failed. Register x19: Expected EDCBE89E, got %h", dut.registers.reg_array[19]);
+        $display("I-type XORI Instruction Test done");
+
         $display("\n--> CPU instruction tests complete");
         $finish;
     end

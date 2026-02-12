@@ -58,7 +58,7 @@ module cpu (
     assign func7 = Instruction[31:25];
     wire alu_zero;
 
-    wire [2:0] alu_control;
+    wire [3:0] alu_control;
     wire [2:0] imm_source;
     wire mem_write;
     wire reg_write;
