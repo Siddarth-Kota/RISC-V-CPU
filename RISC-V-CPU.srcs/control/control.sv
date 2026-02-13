@@ -33,7 +33,6 @@ module control(
                 jump = 1'b0;
             end
             7'b0010011: begin //I-type ALU
-                reg_write = 1'b1;
                 mem_write = 1'b0;
                 imm_source = 3'b000;
                 alu_op = 2'b10;
@@ -41,6 +40,12 @@ module control(
                 write_back_source = 2'b00; //alu result
                 branch = 1'b0;
                 jump = 1'b0;
+                if (func3 == 3'b001) begin
+                    reg_write = (func7 == 7'b0000000) ? 1'b1 : 1'b0; //SLLI valid only if func7 is 0000000
+                end
+                else begin
+                    reg_write = 1'b1;
+                end
             end
             7'b0100011: begin //S-type
                 reg_write = 1'b0;
@@ -111,7 +116,7 @@ module control(
             2'b10 : begin //R-type and I-type ALU
                 case(func3)
                     3'b000 : alu_control = 4'b0000; //ADD
-                    3'b001 : alu_control = 4'b1000; //SLL
+                    3'b001 : alu_control = 4'b0100; //SLL
                     3'b010 : alu_control = 4'b0101; //SLT
                     3'b011 : alu_control = 4'b0111; //SLTU
                     3'b100 : alu_control = 4'b1000; //XOR

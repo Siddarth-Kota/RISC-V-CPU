@@ -232,6 +232,16 @@ module cpu_tb;
         $display("I-type ANDI Instruction Test done");
 
 
+        $display("\n--> I-type SLLI Instruction Test");
+        test_num = 16;
+        assert (dut.Instruction == 32'h00499993) else $error("SLLI Instruction Test Failed. Expected 00499993, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //slli x19 x19 0x4
+        assert (dut.registers.reg_array[19] == 32'hDCBE89E0) else $error("SLLI Instruction Test Failed. Register x19: Expected DCBE89E0, got %h", dut.registers.reg_array[19]);
+        assert (dut.reg_write == 1'b0) else $error("SLLI Instruction Test Failed. reg_write should be 0 for invalid SLLI, got %b", dut.reg_write);
+        @(posedge clk); #0.1; //slli invalid F7
+        assert (dut.registers.reg_array[19] == 32'hDCBE89E0) else $error("SLLI Instruction Test Failed. Register x19: Expected DCBE89E0, got %h", dut.registers.reg_array[19]);
+        $display("I-type SLLI Instruction Test done");
+
         $display("\n--> CPU instruction tests complete");
         $finish;
     end

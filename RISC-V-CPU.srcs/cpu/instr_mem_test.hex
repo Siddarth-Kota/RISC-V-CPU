@@ -35,8 +35,8 @@ AAA9C913  //XORI TEST START  :      xori x18 x19 0xAAA              | x18 <= EDC
 F0F9E893  //                        ori x17 x19 0xF0F               | x17 <= FFFFFF9F
 07F9FE13  //ANDI TEST START  :      andi x28 x19 0x07F              | x28 <= 0000001E
 8009FE93  //                        andi x29 x19 0x800              | x29 <= EDCBE800
-00000013  //NOP
-00000013  //NOP
+00499993  //SLLI TEST SHIFT  :      slli x19 x19 0x4                | x19 <= DCBE89E0
+02499993  //                        slli invalid F7                 | reg_write = 0, x19 <= EDCBE89E
 00000013  //NOP
 00000013  //NOP
 00000013  //NOP

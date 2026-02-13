@@ -9,7 +9,7 @@ module ALU_tb;
     logic zero;
 
     //debug
-    logic [2:0] test_num = -1;
+    logic [3:0] test_num = -1;
     logic [31:0] expected;
 
     ALU dut (
@@ -27,7 +27,7 @@ module ALU_tb;
         //default case test
         $display("Test 0: default case"); //should output 0
         test_num = 0;
-        alu_control = 3'b111; //undefined operation
+        alu_control = 4'b1111; //undefined operation
         operand1 = $urandom();
         operand2 = $urandom();
         #1
@@ -127,6 +127,18 @@ module ALU_tb;
         end
         $display("Test 7 done.");
 
+        //SLL operation test
+        $display("--> Test 8: SLL operation");
+        test_num = 8;
+        alu_control = 4'b0100; //SLL
+        for(int i = 0; i < 1000; i++) begin
+            operand1 = $urandom();
+            operand2 = $urandom();
+            expected = operand1 << operand2[4:0];
+            #1;
+            assert (alu_result === expected) else $error("Test Failed: SLL operation incorrect for operands %0d and %0d. Expected %0d, got %0d", operand1, operand2[4:0], expected, alu_result);
+        end
+        $display("Test 8 done.");
 
         test_num = 0;
         //end of tests
