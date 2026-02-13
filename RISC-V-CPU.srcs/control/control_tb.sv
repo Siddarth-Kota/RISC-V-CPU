@@ -314,13 +314,59 @@ module control_tb();
             assert (alu_source === 1'b1)   else $error("Assertion failed: alu_source != 1 (Got %b)", alu_source);
             assert (write_back_source === 2'b00)   else $error("Assertion failed: write_back_source != 0 (Got %b)", write_back_source);
             assert (pc_source === 1'b0)   else $error("Assertion failed: pc_source != 0 (Got %b)", pc_source);
-            set_default_vals();
             op = 7'b0010011; // I-type ALU
             func3 = 3'b001; // SLLI
             func7 = 7'b0000001; // Invalid SLLI (should not set reg_write)
             #1;
             assert (reg_write === 1'b0)   else $error("Assertion failed: reg_write != 0 for invalid SLLI (Got %b)", reg_write);
             $display("--> I-type ALU (SLLI) Instruction Test done");
+
+
+            test_num = 18;
+            set_default_vals();
+            #1;
+            op = 7'b0010011; // I-type ALU
+            func3 = 3'b101; // SRLI/SRAI
+            func7 = 7'b0000000; // SRLI
+            #1;
+            $display("Test I-type ALU (SRLI) Instruction:");
+            assert (alu_control === 4'b0110) else $error("Assertion failed: alu_control != 0110 (Got %b)", alu_control);
+            assert (imm_source === 3'b000)  else $error("Assertion failed: imm_source != 000 (Got %b)", imm_source);
+            assert (mem_write === 1'b0)   else $error("Assertion failed: mem_write != 0 (Got %b)", mem_write);
+            assert (reg_write === 1'b1)   else $error("Assertion failed: reg_write != 1 (Got %b)", reg_write);
+            assert (alu_source === 1'b1)   else $error("Assertion failed: alu_source != 1 (Got %b)", alu_source);
+            assert (write_back_source === 2'b00)   else $error("Assertion failed: write_back_source != 0 (Got %b)", write_back_source);
+            assert (pc_source === 1'b0)   else $error("Assertion failed: pc_source != 0 (Got %b)", pc_source);
+            op = 7'b0010011; // I-type ALU
+            func3 = 3'b101; // SRLI/SRAI
+            func7 = 7'b0000001; // Invalid SRLI (should not set reg_write)
+            #1;
+            assert (reg_write === 1'b0)   else $error("Assertion failed: reg_write != 0 for invalid SRLI (Got %b)", reg_write);
+            $display("--> I-type ALU (SRLI) Instruction Test done");
+
+
+            test_num = 19;
+            set_default_vals();
+            #1;
+            op = 7'b0010011; // I-type ALU
+            func3 = 3'b101; // SRLI/SRAI
+            func7 = 7'b0100000; // SRAI
+            #1;
+            $display("Test I-type ALU (SRAI) Instruction:");
+            assert (alu_control === 4'b1001) else $error("Assertion failed: alu_control != 1001 (Got %b)", alu_control);
+            assert (imm_source === 3'b000)  else $error("Assertion failed: imm_source != 000 (Got %b)", imm_source);
+            assert (mem_write === 1'b0)   else $error("Assertion failed: mem_write != 0 (Got %b)", mem_write);
+            assert (reg_write === 1'b1)   else $error("Assertion failed: reg_write != 1 (Got %b)", reg_write);
+            assert (alu_source === 1'b1)   else $error("Assertion failed: alu_source != 1 (Got %b)", alu_source);
+            assert (write_back_source === 2'b00)   else $error("Assertion failed: write_back_source != 0 (Got %b)", write_back_source);
+            assert (pc_source === 1'b0)   else $error("Assertion failed: pc_source != 0 (Got %b)", pc_source);
+            op = 7'b0010011; // I-type ALU
+            func3 = 3'b101; // SRLI/SRAI
+            func7 = 7'b0100001; // Invalid SRAI (should not set reg_write)
+            #1;
+            assert (reg_write === 1'b0)   else $error("Assertion failed: reg_write != 0 for invalid SRAI (Got %b)", reg_write);
+            $display("--> I-type ALU (SRAI) Instruction Test done");
+
 
             test_num = 0;
             #10;

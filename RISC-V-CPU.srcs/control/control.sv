@@ -43,6 +43,9 @@ module control(
                 if (func3 == 3'b001) begin
                     reg_write = (func7 == 7'b0000000) ? 1'b1 : 1'b0; //SLLI valid only if func7 is 0000000
                 end
+                else if (func3 == 3'b101) begin
+                    reg_write = (func7 == 7'b0000000 || func7 == 7'b0100000) ? 1'b1 : 1'b0; //SRLI/SRAI valid only if func7 is 0000000 or 0100000
+                end
                 else begin
                     reg_write = 1'b1;
                 end
@@ -120,7 +123,9 @@ module control(
                     3'b010 : alu_control = 4'b0101; //SLT
                     3'b011 : alu_control = 4'b0111; //SLTU
                     3'b100 : alu_control = 4'b1000; //XOR
-
+                    3'b101 : if(func7 == 7'b0000000) alu_control = 4'b0110; //SRL
+                             else if(func7 == 7'b0100000) alu_control = 4'b1001; //SRA
+                             else alu_control = 4'bxxxx; //Invalid
                     3'b110 : alu_control = 4'b0011; //OR
                     3'b111 : alu_control = 4'b0010; //AND
                 endcase
