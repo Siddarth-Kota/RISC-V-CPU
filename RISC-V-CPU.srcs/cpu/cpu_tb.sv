@@ -229,6 +229,8 @@ module cpu_tb;
         assert(dut.registers.reg_array[28] == 32'h0000001E) else $error("ANDI Instruction Test Failed. Register x28: Expected 0000001E, got %h", dut.registers.reg_array[28]);
         @(posedge clk); #0.1; //andi x29 x19 0x800
         assert(dut.registers.reg_array[29] == 32'hEDCBE800) else $error("ANDI Instruction Test Failed. Register x29: Expected EDCBE800, got %h", dut.registers.reg_array[29]);
+        @(posedge clk); #0.1; //andi x20 x21 0x000
+        assert(dut.registers.reg_array[20] == 32'h00000000) else $error("ANDI Instruction Test Failed. Register x20: Expected 00000000, got %h", dut.registers.reg_array[20]);
         $display("I-type ANDI Instruction Test done");
 
 
@@ -241,6 +243,29 @@ module cpu_tb;
         @(posedge clk); #0.1; //slli invalid F7
         assert (dut.registers.reg_array[19] == 32'hDCBE89E0) else $error("SLLI Instruction Test Failed. Register x19: Expected DCBE89E0, got %h", dut.registers.reg_array[19]);
         $display("I-type SLLI Instruction Test done");
+
+
+        $display("\n--> I-type SRLI Instruction Test");
+        test_num = 17;
+        assert (dut.Instruction == 32'h0048DA13) else $error("SRLI Instruction Test Failed. Expected 0048DA13, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //srli x20 x17 0x4
+        assert (dut.registers.reg_array[20] == 32'h0FFFFFF9) else $error("SRLI Instruction Test Failed. Register x20: Expected 0FFFFFF9, got %h", dut.registers.reg_array[20]);
+        assert (dut.reg_write == 1'b0) else $error("SRLI Instruction Test Failed. reg_write should be 0 for invalid SRLI, got %b", dut.reg_write);
+        @(posedge clk); #0.1; //srli invalid F7
+        assert (dut.registers.reg_array[20] == 32'h0FFFFFF9) else $error("SRLI Instruction Test Failed. Register x20: Expected 0FFFFFF9, got %h", dut.registers.reg_array[20]);
+        $display("I-type SRLI Instruction Test done");
+
+
+        $display("\n--> I-type SRAI Instruction Test");
+        test_num = 18;
+        assert (dut.Instruction == 32'h4048DA93) else $error("SRAI Instruction Test Failed. Expected 4048DA93, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //srai x21 x17 0x4
+        assert (dut.registers.reg_array[21] == 32'hFFFFFFF9) else $error("SRAI Instruction Test Failed. Register x21: Expected FFFFFFF9, got %h", dut.registers.reg_array[21]);
+        assert (dut.reg_write == 1'b0) else $error("SRAI Instruction Test Failed. reg_write should be 0 for invalid SRAI, got %b", dut.reg_write);
+        @(posedge clk); #0.1; //srai invalid F7
+        assert (dut.registers.reg_array[21] == 32'hFFFFFFF9) else $error("SRAI Instruction Test Failed. Register x21: Expected FFFFFFF9, got %h", dut.registers.reg_array[21]);
+        $display("I-type SRAI Instruction Test done");
+        
 
         $display("\n--> CPU instruction tests complete");
         $finish;
