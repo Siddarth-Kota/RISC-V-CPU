@@ -48,8 +48,8 @@ F0F9E893  //                        ori x17 x19 0xF0F               | x17 <= FFF
 005A9AB3  //                        sll x21 x21 x5                  | x21 <= FDCDFC00
 015BA333  //SLT TEST START   :      slt x6 x23 x21                  | x6 <= 00000000
 015BB333  //SLTU TEST START  :      sltu x6 x23 x21                 | x6 <= 00000001
-00000013  //NOP
-00000013  //NOP
+005AD433  //SRL TEST START   :      srl x8 x21 x5                   | x8 <= 00FDCDFC
+405AD4B3  //SRA TEST START   :      sra x9 x21 x5                   | x9 <= FFFDCDFC
 00000013  //NOP
 00000013  //NOP
 00000013  //NOP

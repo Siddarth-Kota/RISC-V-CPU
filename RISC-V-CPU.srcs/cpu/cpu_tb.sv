@@ -308,6 +308,21 @@ module cpu_tb;
         assert (dut.registers.reg_array[6] == 32'h00000001) else $error("SLTU Instruction Test Failed. Register x6: Expected 1, got %h", dut.registers.reg_array[6]);
         $display("R-type SLTU Instruction Test done");
 
+
+        $display("\n--> Testing R-type SRL Instruction");
+        test_num = 24;
+        assert (dut.Instruction == 32'h005AD433) else $error("SRL Instruction Test Failed. Expected 005AD433, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //srl x8 x21 x5
+        assert (dut.registers.reg_array[8] == 32'h00FDCDFC) else $error("SRL Instruction Test Failed. Register x8: Expected 00FDCDFC, got %h", dut.registers.reg_array[8]);
+        $display("R-type SRL Instruction Test done");
+
+
+        $display("\n--> Testing R-type SRA Instruction");
+        test_num = 25;
+        assert (dut.Instruction == 32'h405AD4B3) else $error("SRA Instruction Test Failed. Expected 405AD4B3, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //sra x9 x21 x5
+        assert (dut.registers.reg_array[9] == 32'hFFFDCDFC) else $error("SRA Instruction Test Failed. Register x9: Expected FFFDCDFC, got %h", dut.registers.reg_array[9]);
+        $display("R-type SRA Instruction Test done");
         
         $display("\n--> CPU instruction tests complete\n");
         $finish;
