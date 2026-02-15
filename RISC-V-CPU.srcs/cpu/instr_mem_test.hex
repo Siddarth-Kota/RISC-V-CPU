@@ -42,7 +42,7 @@ F0F9E893  //                        ori x17 x19 0xF0F               | x17 <= FFF
 0248DA13  //                        srli invalid F7                 | reg_write = 0, x20 <= 0FFFFFF9
 4048DA93  //SRAI TEST START  :      srai x21 x17 0x4                | x21 <= FFFFFFF9
 4248DA93  //                        srai invalid F7                 | reg_write = 0, x21 <= FFFFFFF9
-00000013  //NOP
+419A8BB3  //SUB TEST START   :      sub x23, x21, x25               | x23 <= 4343441C
 00000013  //NOP
 00000013  //NOP
 00000013  //NOP

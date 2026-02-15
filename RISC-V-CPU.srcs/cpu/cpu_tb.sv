@@ -265,9 +265,18 @@ module cpu_tb;
         @(posedge clk); #0.1; //srai invalid F7
         assert (dut.registers.reg_array[21] == 32'hFFFFFFF9) else $error("SRAI Instruction Test Failed. Register x21: Expected FFFFFFF9, got %h", dut.registers.reg_array[21]);
         $display("I-type SRAI Instruction Test done");
-        
 
-        $display("\n--> CPU instruction tests complete");
+
+        $display("\n--> Testing R-type SUB Instruction");
+        test_num = 19;
+        assert (dut.Instruction == 32'h419A8BB3) else $error("SUB Instruction Test Failed. Expected 419A8BB3, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //sub x23, x21, x25
+        assert (dut.registers.reg_array[23] == 32'h4343441C) else $error("SUB Instruction Test Failed. Register x23: Expected 4343441C, got %h", dut.registers.reg_array[23]);
+        $display("R-type SUB Instruction Test done");
+
+
+
+        $display("\n--> CPU instruction tests complete\n");
         $finish;
     end
 endmodule

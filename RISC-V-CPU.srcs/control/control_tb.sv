@@ -103,6 +103,7 @@ module control_tb();
             #1;
             op = 7'b0110011; // R-type ADD
             func3 = 3'b000;
+            func7 = 7'b0000000;
             #1;
             $display("Test R-type ADD Instruction:");
             assert (alu_control === 4'b0000) else $error("Assertion failed: alu_control != 0000 (Got %b)", alu_control);
@@ -366,6 +367,24 @@ module control_tb();
             #1;
             assert (reg_write === 1'b0)   else $error("Assertion failed: reg_write != 0 for invalid SRAI (Got %b)", reg_write);
             $display("--> I-type ALU (SRAI) Instruction Test done");
+
+
+            test_num = 20;
+            set_default_vals();
+            #1;
+            op = 7'b0110011; // R-type SUB
+            func3 = 3'b000;
+            func7 = 7'b0100000;
+            #1;
+            $display("Test R-type SUB Instruction:");
+            assert (alu_control === 4'b0001) else $error("Assertion failed: alu_control != 0001 (Got %b)", alu_control);
+            assert (reg_write === 1'b1)   else $error("Assertion failed: reg_write != 1 (Got %b)", reg_write);
+            assert (mem_write === 1'b0)   else $error("Assertion failed: mem_write != 0 (Got %b)", mem_write);
+            assert (alu_source === 1'b0)   else $error("Assertion failed: alu_source != 0 (Got %b)", alu_source);
+            assert (write_back_source === 2'b00)   else $error("Assertion failed: write_back_source != 0 (Got %b)", write_back_source);
+            assert (pc_source === 1'b0)   else $error("Assertion failed: pc_source != 0 (Got %b)", pc_source);
+            $display("--> R-type SUB Instruction Test done");
+
 
 
             test_num = 0;

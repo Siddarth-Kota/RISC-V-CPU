@@ -118,7 +118,14 @@ module control(
             2'b00 : alu_control = 4'b0000; //LW,SW: ADD
             2'b10 : begin //R-type and I-type ALU
                 case(func3)
-                    3'b000 : alu_control = 4'b0000; //ADD
+                    3'b000 : begin
+                        if(op == 7'b0110011) begin //R-type
+                            alu_control = func7[5] ? 4'b0001 : 4'b0000; //SUB : ADD
+                        end
+                        else begin //I-type ALU
+                            alu_control = 4'b0000; //ADDI
+                        end
+                    end
                     3'b001 : alu_control = 4'b0100; //SLL
                     3'b010 : alu_control = 4'b0101; //SLT
                     3'b011 : alu_control = 4'b0111; //SLTU
