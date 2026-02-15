@@ -275,7 +275,40 @@ module cpu_tb;
         $display("R-type SUB Instruction Test done");
 
 
+        $display("\n--> Testing R-type XOR Instruction");
+        test_num = 20;
+        assert (dut.Instruction == 32'h013BCAB3) else $error("XOR Instruction Test Failed. Expected 013BCAB3, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //xor x21, x23, x19
+        assert (dut.registers.reg_array[21] == 32'h9FFDCDFC) else $error("XOR Instruction Test Failed. Register x21: Expected 9FFDCDFC, got %h", dut.registers.reg_array[21]);
+        $display("R-type XOR Instruction Test done");
 
+
+        $display("\n--> Testing R-type SLL Instruction");
+        test_num = 21;
+        @(posedge clk); #0.1; //addi x5 x0 0x8
+        assert(dut.registers.reg_array[5] == 32'h00000008) else $error("ADDI Instruction Test Failed. Register x5: Expected 00000008, got %h", dut.registers.reg_array[5]);
+        assert(dut.Instruction == 32'h005A9AB3) else $error("SLL Instruction Test Failed. Expected 005A9AB3, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //sll x21 x21 x5
+        assert(dut.registers.reg_array[21] == 32'hFDCDFC00) else $error("SLL Instruction Test Failed. Register x21: Expected FDCDFC00, got %h", dut.registers.reg_array[21]);
+        $display("R-type SLL Instruction Test done");
+
+        
+        $display("\n--> Testing R-type SLT Instruction");
+        test_num = 22;
+        assert (dut.Instruction == 32'h015BA333) else $error("SLT Instruction Test Failed. Expected 015BA333, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //slt x6 x23 x21
+        assert (dut.registers.reg_array[6] == 32'h00000000) else $error("SLT Instruction Test Failed. Register x6: Expected 0, got %h", dut.registers.reg_array[6]);
+        $display("R-type SLT Instruction Test done");
+
+
+        $display("\n--> Testing R-type SLTU Instruction");
+        test_num = 23;
+        assert (dut.Instruction == 32'h015BB333) else $error("SLTU Instruction Test Failed. Expected 015BB333, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //sltu x6 x23 x21
+        assert (dut.registers.reg_array[6] == 32'h00000001) else $error("SLTU Instruction Test Failed. Register x6: Expected 1, got %h", dut.registers.reg_array[6]);
+        $display("R-type SLTU Instruction Test done");
+
+        
         $display("\n--> CPU instruction tests complete\n");
         $finish;
     end

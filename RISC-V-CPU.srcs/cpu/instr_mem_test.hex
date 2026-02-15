@@ -43,11 +43,11 @@ F0F9E893  //                        ori x17 x19 0xF0F               | x17 <= FFF
 4048DA93  //SRAI TEST START  :      srai x21 x17 0x4                | x21 <= FFFFFFF9
 4248DA93  //                        srai invalid F7                 | reg_write = 0, x21 <= FFFFFFF9
 419A8BB3  //SUB TEST START   :      sub x23, x21, x25               | x23 <= 4343441C
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
+013BCAB3  //XOR TEST START   :      xor x21, x23, x19               | x21 <= 9FFDCDFC
+00800293  //SLL TEST START   :      addi x5 x0 0x8                  | x5 <= 00000008
+005A9AB3  //                        sll x21 x21 x5                  | x21 <= FDCDFC00
+015BA333  //SLT TEST START   :      slt x6 x23 x21                  | x6 <= 00000000
+015BB333  //SLTU TEST START  :      sltu x6 x23 x21                 | x6 <= 00000001
 00000013  //NOP
 00000013  //NOP
 00000013  //NOP
