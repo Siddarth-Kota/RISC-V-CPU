@@ -101,9 +101,9 @@ module control_tb();
             test_num = 4;
             set_default_vals();
             #1;
-            op = 7'b0110011; // R-type ADD
-            func3 = 3'b000;
-            func7 = 7'b0000000;
+            op = 7'b0110011; // R-type
+            func3 = 3'b000; // ADD/SUB
+            func7 = 7'b0000000; // ADD
             #1;
             $display("Test R-type ADD Instruction:");
             assert (alu_control === 4'b0000) else $error("Assertion failed: alu_control != 0000 (Got %b)", alu_control);
@@ -117,8 +117,8 @@ module control_tb();
             test_num = 5;
             set_default_vals();
             #1;
-            op = 7'b0110011; // R-type AND
-            func3 = 3'b111;
+            op = 7'b0110011; // R-type
+            func3 = 3'b111; // AND
             #1;
             $display("Test R-type AND Instruction:");
             assert (alu_control === 4'b0010) else $error("Assertion failed: alu_control != 0010 (Got %b)", alu_control);
@@ -132,8 +132,8 @@ module control_tb();
             test_num = 6;
             set_default_vals();
             #1;
-            op = 7'b0110011; // R-type OR
-            func3 = 3'b110;
+            op = 7'b0110011; // R-type
+            func3 = 3'b110; // OR
             #1;
             $display("Test R-type OR Instruction:");
             assert (alu_control === 4'b0011) else $error("Assertion failed: alu_control != 0011 (Got %b)", alu_control);
@@ -147,9 +147,9 @@ module control_tb();
             test_num = 7;
             set_default_vals();
             #1;
-            op = 7'b1100011; // B-type BEQ
-            func3 = 3'b000;
-            alu_zero = 1'b0;
+            op = 7'b1100011; // B-type
+            func3 = 3'b000; // BEQ
+            alu_zero = 1'b0; // Not Taken
             #1;
             $display("Test B-type BEQ Instruction (Not Taken):");
             assert (imm_source === 3'b010)  else $error("Assertion failed: imm_source != 010 (Got %b)", imm_source);
@@ -165,9 +165,9 @@ module control_tb();
             test_num = 8;
             set_default_vals();
             #1;
-            op = 7'b1100011; // B-type BEQ
-            func3 = 3'b000;
-            alu_zero = 1'b1;
+            op = 7'b1100011; // B-type
+            func3 = 3'b000; // BEQ
+            alu_zero = 1'b1; // Taken
             #1;
             $display("Test B-type BEQ Instruction (Taken):");
             assert (pc_source   === 1'b1)   else $error("Assertion failed: pc_source != 1 (Got %b)", pc_source);
@@ -372,9 +372,9 @@ module control_tb();
             test_num = 20;
             set_default_vals();
             #1;
-            op = 7'b0110011; // R-type SUB
-            func3 = 3'b000;
-            func7 = 7'b0100000;
+            op = 7'b0110011; // R-type
+            func3 = 3'b000; // ADD/SUB
+            func7 = 7'b0100000; // SUB
             #1;
             $display("Test R-type SUB Instruction:");
             assert (alu_control === 4'b0001) else $error("Assertion failed: alu_control != 0001 (Got %b)", alu_control);
@@ -384,7 +384,6 @@ module control_tb();
             assert (write_back_source === 2'b00)   else $error("Assertion failed: write_back_source != 0 (Got %b)", write_back_source);
             assert (pc_source === 1'b0)   else $error("Assertion failed: pc_source != 0 (Got %b)", pc_source);
             $display("--> R-type SUB Instruction Test done");
-
 
 
             test_num = 0;
