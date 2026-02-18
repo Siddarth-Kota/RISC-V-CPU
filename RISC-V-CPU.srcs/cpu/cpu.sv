@@ -57,6 +57,7 @@ module cpu (
     logic [6:0] func7;
     assign func7 = Instruction[31:25];
     wire alu_zero;
+    wire alu_last_bit;
 
     wire [3:0] alu_control;
     wire [2:0] imm_source;
@@ -74,7 +75,8 @@ module cpu (
         .func3(func3),
         .func7(func7),
         .alu_zero(alu_zero),
-        
+        .alu_last_bit(alu_last_bit),
+
         .alu_control(alu_control),
         .imm_source(imm_source),
         .mem_write(mem_write),
@@ -150,7 +152,8 @@ module cpu (
         .operand2(alu_op2),
         
         .alu_result(alu_result),
-        .zero(alu_zero)
+        .zero(alu_zero),
+        .last_bit(alu_last_bit)
     );
 
     //Data Memory

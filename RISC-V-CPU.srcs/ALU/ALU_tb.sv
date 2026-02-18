@@ -7,6 +7,8 @@ module ALU_tb;
     logic [31:0] operand2;
     logic [31:0] alu_result;
     logic zero;
+    logic last_bit;
+
 
     //debug
     logic [3:0] test_num = -1;
@@ -16,8 +18,10 @@ module ALU_tb;
         .alu_control(alu_control),
         .operand1(operand1),
         .operand2(operand2),
+        
         .alu_result(alu_result),
-        .zero(zero)
+        .zero(zero),
+        .last_bit(last_bit)
     );
 
     //test logic
@@ -88,7 +92,7 @@ module ALU_tb;
         end
         $display("Test 4 done.");
 
-        //SLTI operation test
+        //SLT operation test
         $display("--> Test 5: SLT operation");
         test_num = 5;
         alu_control = 4'b0101; //SLT
@@ -167,6 +171,21 @@ module ALU_tb;
             assert (alu_result === expected) else $error("Test Failed: SRA operation incorrect for operands %0d and %0d. Expected %0d, got %0d", $signed(operand1), operand2[4:0], expected, alu_result);
         end
         $display("Test 10 done.");
+
+
+        //last bit test
+        $display("--> Test 11: Last Bit test");
+        test_num = 11;
+        alu_control = 4'b0101; //SLT
+        for(int i = 0; i < 1000; i++) begin
+            operand1 = $urandom();
+            operand2 = $urandom();
+            expected = ($signed(operand1) < $signed(operand2)) ? 32'b1 : 32'b0;
+            #1;
+            assert (last_bit === expected) else $error("Test Failed: last_bit incorrect for operands %0d and %0d. Expected %0d, got %0d", $signed(operand1), $signed(operand2), expected, alu_result);
+        end
+        $display("Test 11 done.");
+
         
 
         test_num = 0;

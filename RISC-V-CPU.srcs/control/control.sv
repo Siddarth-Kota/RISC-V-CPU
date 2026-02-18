@@ -5,6 +5,7 @@ module control(
     input logic [2:0] func3,
     input logic [6:0] func7,
     input logic alu_zero,
+    input logic alu_last_bit,
 
     output logic [3:0] alu_control,
     output logic [2:0] imm_source,
@@ -137,12 +138,24 @@ module control(
                     3'b111 : alu_control = 4'b0010; //AND
                 endcase
             end
-            2'b01 : alu_control = 4'b0001; //BEQ: SUB
+            2'b01 : begin
+                case (func3)
+                    3'b000 : alu_control = 4'b0001; //BEQ
+                    3'b100 : alu_control = 4'b0101; //BLT
+                endcase
+            end
         endcase
     end
 
     //PC Source Logic
     logic assert_branch;
-    assign assert_branch = branch & alu_zero;
+
+    always_comb begin : branch_logic_decode
+        case(func3)
+            3'b000: assert_branch = branch & alu_zero; //BEQ
+            3'b100: assert_branch = alu_last_bit & branch; //BLT
+            default: assert_branch = 1'b0;
+        endcase
+    end
     assign pc_source = (assert_branch & (op == 7'b1100011)) | jump;
 endmodule

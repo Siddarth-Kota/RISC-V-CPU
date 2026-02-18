@@ -323,6 +323,19 @@ module cpu_tb;
         @(posedge clk); #0.1; //sra x9 x21 x5
         assert (dut.registers.reg_array[9] == 32'hFFFDCDFC) else $error("SRA Instruction Test Failed. Register x9: Expected FFFDCDFC, got %h", dut.registers.reg_array[9]);
         $display("R-type SRA Instruction Test done");
+
+
+        $display("\n--> Testing B-type BLT Instruction");
+        test_num = 26;
+        assert (dut.Instruction == 32'h0092C463) else $error("BLT Instruction Test Failed. Expected 0092C463, got %h", dut.Instruction);
+        assert (dut.registers.reg_array[5] == 32'h00000008) else $error("BLT Instruction Test Failed. Register x5: Expected 00000008, got %h", dut.registers.reg_array[5]);
+        assert (dut.registers.reg_array[9] == 32'hFFFDCDFC) else $error("BLT Instruction Test Failed. Register x9: Expected FFFDCDFC, got %h", dut.registers.reg_array[9]);
+        @(posedge clk); #0.1; //blt x5 x9 0x8
+        assert (dut.Instruction == 32'h0054C463) else $error("BLT Instruction Test Failed. Expected 0054C463, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //blt x9 x5 0x8
+        assert (dut.Instruction != 32'h00C00413) else $error("BLT Instruction Test Failed. Expected not 00C00413, got %h", dut.Instruction);
+        assert (dut.registers.reg_array[8] == 32'h00FDCDFC) else $error("BLT Instruction Test Failed. Register x8: Expected 00FDCDFC, got %h", dut.registers.reg_array[8]);
+        $display("B-type BLT Instruction Test done");
         
         $display("\n--> CPU instruction tests complete\n");
         $finish;

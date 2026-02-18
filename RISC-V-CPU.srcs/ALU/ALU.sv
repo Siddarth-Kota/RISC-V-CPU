@@ -6,7 +6,8 @@ module ALU (
     input logic [31:0] operand2,
 
     output logic [31:0] alu_result,
-    output logic zero
+    output logic zero,
+    output logic last_bit
     );
 
     always_comb begin
@@ -26,4 +27,5 @@ module ALU (
     end
 
     assign zero = (alu_result == 32'b0) ? 1'b1 : 1'b0; //set zero flag
+    assign last_bit = alu_result[0];
 endmodule
