@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 
 module memory #(
-    parameter integer WORDS = 64,
+    parameter integer WORDS = 256,
     parameter string mem_init = ""
 ) (
     input logic clk, //positive edge clock
