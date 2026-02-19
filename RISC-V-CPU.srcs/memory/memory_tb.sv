@@ -2,7 +2,7 @@
 
 module memory_tb;
     //Params
-    parameter integer WORDS = 64;
+    parameter integer WORDS = 256;
     parameter CLK_PERIOD = 10; //10ns clock period
 
     //Debug
