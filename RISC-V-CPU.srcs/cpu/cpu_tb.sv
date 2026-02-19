@@ -338,8 +338,60 @@ module cpu_tb;
         $display("B-type BLT Instruction Test done");
 
 
-        $display("\n--> Testing I-type JALR Instruction");
+        $display("\n--> Testing B-type BNE Instruction");
         test_num = 27;
+        assert (dut.Instruction == 32'h00949463) else $error("BNE Instruction Test Failed. Expected 00949463, got %h", dut.Instruction);
+        assert (dut.registers.reg_array[5] == 32'h00000008) else $error("BNE Instruction Test Failed. Register x5: Expected 00000008, got %h", dut.registers.reg_array[5]);
+        assert (dut.registers.reg_array[9] == 32'hFFFDCDFC) else $error("BNE Instruction Test Failed. Register x9: Expected FFFDCDFC, got %h", dut.registers.reg_array[9]);
+        @(posedge clk); #0.1; //bne x9 x9 0x8
+        assert (dut.Instruction == 32'h00549463) else $error("BNE Instruction Test Failed. Expected 00549463, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //bne x9 x5 0x8
+        assert (dut.Instruction != 32'h00C00413) else $error("BNE Instruction Test Failed. Expected not 00C00413, got %h", dut.Instruction);
+        assert (dut.registers.reg_array[8] == 32'h00FDCDFC) else $error("BNE Instruction Test Failed. Register x8: Expected 00FDCDFC, got %h", dut.registers.reg_array[8]);
+        $display("B-type BNE Instruction Test done");
+
+
+        $display("\n--> Testing B-type BGE Instruction");
+        test_num = 28;
+        assert (dut.Instruction == 32'h0054D463) else $error("BGE Instruction Test Failed. Expected 0054D463, got %h", dut.Instruction);
+        assert (dut.registers.reg_array[5] == 32'h00000008) else $error("BGE Instruction Test Failed. Register x5: Expected 00000008, got %h", dut.registers.reg_array[5]);
+        assert (dut.registers.reg_array[9] == 32'hFFFDCDFC) else $error("BGE Instruction Test Failed. Register x9: Expected FFFDCDFC, got %h", dut.registers.reg_array[9]);
+        @(posedge clk); #0.1; //bge x9 x5 0x8
+        assert (dut.Instruction == 32'h0094D463) else $error("BGE Instruction Test Failed. Expected 0094D463, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //bge x9 x9 0x8
+        assert (dut.Instruction != 32'h00C00413) else $error("BGE Instruction Test Failed. Expected not 00C00413, got %h", dut.Instruction);
+        assert (dut.registers.reg_array[8] == 32'h00FDCDFC) else $error("BGE Instruction Test Failed. Register x8: Expected 00FDCDFC, got %h", dut.registers.reg_array[8]);
+        $display("B-type BGE Instruction Test done");
+
+
+        $display("\n--> Testing B-type BLTU Instruction");
+        test_num = 29;
+        assert (dut.Instruction == 32'h0054E463) else $error("BLTU Instruction Test Failed. Expected 0054E463, got %h", dut.Instruction);
+        assert (dut.registers.reg_array[5] == 32'h00000008) else $error("BLTU Instruction Test Failed. Register x5: Expected 00000008, got %h", dut.registers.reg_array[5]);
+        assert (dut.registers.reg_array[9] == 32'hFFFDCDFC) else $error("BLTU Instruction Test Failed. Register x9: Expected FFFDCDFC, got %h", dut.registers.reg_array[9]);
+        @(posedge clk); #0.1; //bltu x9 x5 0x8
+        assert (dut.Instruction == 32'h0092E463) else $error("BLTU Instruction Test Failed. Expected 0092E463, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //bltu x5 x9 0x8
+        assert (dut.Instruction != 32'h00C00413) else $error("BLTU Instruction Test Failed. Expected not 00C00413, got %h", dut.Instruction);
+        assert (dut.registers.reg_array[8] == 32'h00FDCDFC) else $error("BLTU Instruction Test Failed. Register x8: Expected 00FDCDFC, got %h", dut.registers.reg_array[8]);
+        $display("B-type BLTU Instruction Test done");
+
+
+        $display("\n--> Testing B-type BGEU Instruction");
+        test_num = 30;
+        assert (dut.Instruction == 32'h0092F463) else $error("BGEU Instruction Test Failed. Expected 0092F463, got %h", dut.Instruction);
+        assert (dut.registers.reg_array[5] == 32'h00000008) else $error("BGEU Instruction Test Failed. Register x5: Expected 00000008, got %h", dut.registers.reg_array[5]);
+        assert (dut.registers.reg_array[9] == 32'hFFFDCDFC) else $error("BGEU Instruction Test Failed. Register x9: Expected FFFDCDFC, got %h", dut.registers.reg_array[9]);
+        @(posedge clk); #0.1; //bgeu x5 x9 0x8
+        assert (dut.Instruction == 32'h0054F463) else $error("BGEU Instruction Test Failed. Expected 0054F463, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //bgeu x9 x5 0x8
+        assert (dut.Instruction != 32'h00C00413) else $error("BGEU Instruction Test Failed. Expected not 00C00413, got %h", dut.Instruction);
+        assert (dut.registers.reg_array[8] == 32'h00FDCDFC) else $error("BGEU Instruction Test Failed. Register x8: Expected 00FDCDFC, got %h", dut.registers.reg_array[8]);
+        $display("B-type BGEU Instruction Test done");
+
+
+        $display("\n--> Testing I-type JALR Instruction");
+        test_num = 31;
         assert(dut.Instruction == 32'h00000397) else $error("JALR Instruction Test Failed. Expected 00000397, got %h", dut.Instruction);
         assert(dut.pc == 32'h0000010C) else $error("JALR Instruction Test Failed. PC: Expected 0000010C, got %h", dut.pc);
         @(posedge clk); #0.1; //jalr x7 x0 0x0

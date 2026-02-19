@@ -504,7 +504,7 @@ module control_tb();
             $display("--> B-type BGEU Instruction Test done");
 
             
-            test_num = 28;
+            test_num = 26;
             set_default_vals();
             #1;
             op = 7'b1100111; // I-type JALR

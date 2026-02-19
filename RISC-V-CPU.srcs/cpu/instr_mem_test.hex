@@ -6,14 +6,14 @@
 01802283  //OR  TEST START   :      lw x5 0x18(x0)                  | x5  <= 56785678
 01C02303  //                        lw x6 0x1C(x0)                  | x6  <= BCBCBCBC
 0062E3B3  //                        or x7 x5 x6                     | x7  <= FEFCFEFC
-00730663  //BEQ TEST START   :      beq x7 x5 0xC                   | #1 - Shouldn't Branch
+00730663  //BEQ TEST START   :      beq x7 x5 0xC                   | Doesn't Branch : x7 != x5
 00802B03  //                        lw x22 0x8(x0)                  | x22 <= AFAFAFAF
-01690863  //                        beq x18 x22 0x10                | #2 - Should Branch (+ offset)
+01690863  //                        beq x18 x22 0x10                | Branch : x18 == x22 (positive offset)
 00000013  //                        NOP                             | Skipped if branch taken correctly
 00000013  //                        NOP                             | Skipped if branch taken correctly
-00000663  //                        beq x0 x0 0xC                   | #4 - Should Branch (avoid loop)
+00000663  //                        beq x0 x0 0xC                   | Branch : x0 == x0 (avoid infinite loop)
 00002B03  //                        lw x22 0x0(x0)                  | x22 <= ABABABAB
-FF6B0CE3  //                        beq x22 x22 -0x8                | #3 Should Branch (-offset)
+FF6B0CE3  //                        beq x22 x22 -0x8                | Branch : x22 == x22 (negative offset)
 00000013  //                        NOP                             | Skipped if branch taken correctly
 00C000EF  //JAL TEST START   :      jal x1 0xC                      | #1 jump @PC+0xC
 00000013  //                        NOP                             | Skipped if jump taken correctly
@@ -53,22 +53,22 @@ F0F9E893  //                        ori x17 x19 0xF0F               | x17 <= FFF
 0092C463  //BLT TEST START   :      blt x5 x9 0x8                   | not taken : x9 neg (sign), x5 pos (no sign)
 0054C463  //                        blt x9 x5 0x8                   | taken : x9 neg (sign), x5 pos (no sign)
 00C00413  //                        addi x8 x0 0xC                  | Skipped if branch taken correctly
+00949463  //BNE TEST START   :      bne x9 x9 0x8                   | not taken
+00549463  //                        bne x9 x5 0x8                   | taken
+00C00413  //                        addi x8 x0 0xC                  | Skipped if branch taken correctly
+0054D463  //BGE TEST START  :       bge x9 x5 0x8                   | not taken
+0094D463  //                        bge x9 x9 0x8                   | taken
+00C00413  //                        addi x8 x0 0xC                  | Skipped if branch taken correctly
+0054E463  //BLTU TEST START :       bltu x9 x5 0x8                  | not taken
+0092E463  //                        bltu x5 x9 0x8                  | taken
+00C00413  //                        addi x8 x0 0xC                  | Skipped if branch taken correctly
+0092F463  //BGEU TEST START :       bgeu x5 x9 0x8                  | not taken
+0054F463  //                        bgeu x9 x5 0x8                  | taken
+00C00413  //                        addi x8 x0 0xC                  | Skipped if branch taken correctly
 00000397  //JALR TEST START :       auipc x7 0x0                    | x7 <= 0000010C                PC = 0x10C 
 01438393  //                        addi x7 x7 0x14                 | x7 <= 00000120                PC = 0x110
 FFC380E7  //                        jalr x1 -4(x7)                  | x1 <= 00000118, go @PC 0x11C  PC = 0x114
 00C00413  //                        addi x8 x0 0xC                  | NEVER EXECUTED (check value)  PC = 0x118
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
 00000013  //NOP
 00000013  //NOP
 00000013  //NOP
