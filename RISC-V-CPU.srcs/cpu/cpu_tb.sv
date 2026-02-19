@@ -404,6 +404,7 @@ module cpu_tb;
         assert(dut.pc == 32'h0000011C) else $error("JALR Instruction Test Failed. PC: Expected 0000011C, got %h", dut.pc);
         $display("I-type JALR Instruction Test done");
         
+        test_num = 0;
         $display("\n--> CPU instruction tests complete\n");
         $finish;
     end
