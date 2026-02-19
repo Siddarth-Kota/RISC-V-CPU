@@ -147,8 +147,9 @@ module control(
             end
             2'b01 : begin
                 case (func3)
-                    3'b000 : alu_control = 4'b0001; //BEQ
-                    3'b100 : alu_control = 4'b0101; //BLT
+                    3'b000, 3'b001 : alu_control = 4'b0001; //BEQ, BNE
+                    3'b100, 3'b101 : alu_control = 4'b0101; //BLT, BGE
+                    3'b110, 3'b111 : alu_control = 4'b0111; //BLTU, BGEU
                 endcase
             end
         endcase
@@ -160,7 +161,9 @@ module control(
     always_comb begin : branch_logic_decode
         case(func3)
             3'b000: assert_branch = branch & alu_zero; //BEQ
-            3'b100: assert_branch = alu_last_bit & branch; //BLT
+            3'b001: assert_branch = branch & ~alu_zero; //BNE
+            3'b100, 3'b110: assert_branch = alu_last_bit & branch; //BLT, BLTU
+            3'b101, 3'b111: assert_branch = ~alu_last_bit & branch; //BGE, BGEU
             default: assert_branch = 1'b0;
         endcase
     end

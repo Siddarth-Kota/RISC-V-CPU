@@ -411,8 +411,100 @@ module control_tb();
             assert (second_add_source === 2'b00)   else $error("Assertion failed: second_add_source != 00 (Got %b)", second_add_source);
             $display("--> B-type BLT Instruction Test done");
 
-            
+
             test_num = 22;
+            set_default_vals();
+            #1;
+            op = 7'b1100011; // B-type
+            func3 = 3'b001; // BNE
+            alu_zero = 1'b1; // Not Taken
+            #1;
+            $display("Test B-type BNE Instruction:");
+            assert (imm_source === 3'b010)  else $error("Assertion failed: imm_source != 010 (Got %b)", imm_source);
+            assert (alu_control === 4'b0001) else $error("Assertion failed: alu_control != 0001 (Got %b)", alu_control);
+            assert (reg_write === 1'b0)   else $error("Assertion failed: reg_write != 0 (Got %b)", reg_write);
+            assert (mem_write === 1'b0)   else $error("Assertion failed: mem_write != 0 (Got %b)", mem_write);
+            assert (alu_source === 1'b0)   else $error("Assertion failed: alu_source != 0 (Got %b)", alu_source);
+            assert (second_add_source === 2'b00)   else $error("Assertion failed: second_add_source != 00 (Got %b)", second_add_source);
+            assert (pc_source === 1'b0)   else $error("Assertion failed: pc_source != 0 (Got %b)", pc_source);
+            assert (branch === 1'b1)   else $error("Assertion failed: branch != 1 (Got %b)", branch);
+            alu_zero = 1'b0; // Taken
+            #1;
+            assert (pc_source   === 1'b1)   else $error("Assertion failed: pc_source != 1 (Got %b)", pc_source);
+            assert (second_add_source === 2'b00)   else $error("Assertion failed: second_add_source != 00 (Got %b)", second_add_source);
+            $display("--> B-type BNE Instruction Test done");
+
+
+            test_num = 23;
+            set_default_vals();
+            #1;
+            op = 7'b1100011; // B-type
+            func3 = 3'b101; // BGE
+            alu_last_bit = 1'b1; // Not Taken
+            #1;
+            $display("Test B-type BGE Instruction:");
+            assert (imm_source === 3'b010)  else $error("Assertion failed: imm_source != 010 (Got %b)", imm_source);
+            assert (alu_control === 4'b0101) else $error("Assertion failed: alu_control != 0101 (Got %b)", alu_control);
+            assert (reg_write === 1'b0)   else $error("Assertion failed: reg_write != 0 (Got %b)", reg_write);
+            assert (mem_write === 1'b0)   else $error("Assertion failed: mem_write != 0 (Got %b)", mem_write);
+            assert (alu_source === 1'b0)   else $error("Assertion failed: alu_source != 0 (Got %b)", alu_source);
+            assert (second_add_source === 2'b00)   else $error("Assertion failed: second_add_source != 00 (Got %b)", second_add_source);
+            assert (pc_source === 1'b0)   else $error("Assertion failed: pc_source != 0 (Got %b)", pc_source);
+            assert (branch === 1'b1)   else $error("Assertion failed: branch != 1 (Got %b)", branch);
+            alu_last_bit = 1'b0; // Taken
+            #1;
+            assert (pc_source   === 1'b1)   else $error("Assertion failed: pc_source != 1 (Got %b)", pc_source);
+            assert (second_add_source === 2'b00)   else $error("Assertion failed: second_add_source != 00 (Got %b)", second_add_source);
+            $display("--> B-type BGE Instruction Test done");
+
+
+            test_num = 24;
+            set_default_vals();
+            #1;
+            op = 7'b1100011; // B-type
+            func3 = 3'b110; // BLTU
+            alu_last_bit = 1'b0; // Not Taken
+            #1;
+            $display("Test B-type BLTU Instruction:");
+            assert (imm_source === 3'b010)  else $error("Assertion failed: imm_source != 010 (Got %b)", imm_source);
+            assert (alu_control === 4'b0111) else $error("Assertion failed: alu_control != 0111 (Got %b)", alu_control);
+            assert (reg_write === 1'b0)   else $error("Assertion failed: reg_write != 0 (Got %b)", reg_write);
+            assert (mem_write === 1'b0)   else $error("Assertion failed: mem_write != 0 (Got %b)", mem_write);
+            assert (alu_source === 1'b0)   else $error("Assertion failed: alu_source != 0 (Got %b)", alu_source);
+            assert (second_add_source === 2'b00)   else $error("Assertion failed: second_add_source != 00 (Got %b)", second_add_source);
+            assert (pc_source === 1'b0)   else $error("Assertion failed: pc_source != 0 (Got %b)", pc_source);
+            assert (branch === 1'b1)   else $error("Assertion failed: branch != 1 (Got %b)", branch);
+            alu_last_bit = 1'b1; // Taken
+            #1;
+            assert (pc_source   === 1'b1)   else $error("Assertion failed: pc_source != 1 (Got %b)", pc_source);
+            assert (second_add_source === 2'b00)   else $error("Assertion failed: second_add_source != 00 (Got %b)", second_add_source);
+            $display("--> B-type BLTU Instruction Test done");
+
+
+            test_num = 25;
+            set_default_vals();
+            #1;
+            op = 7'b1100011; // B-type
+            func3 = 3'b111; // BGEU
+            alu_last_bit = 1'b1; // Not Taken
+            #1;
+            $display("Test B-type BGEU Instruction:");
+            assert (imm_source === 3'b010)  else $error("Assertion failed: imm_source != 010 (Got %b)", imm_source);
+            assert (alu_control === 4'b0111) else $error("Assertion failed: alu_control != 0111 (Got %b)", alu_control);
+            assert (reg_write === 1'b0)   else $error("Assertion failed: reg_write != 0 (Got %b)", reg_write);
+            assert (mem_write === 1'b0)   else $error("Assertion failed: mem_write != 0 (Got %b)", mem_write);
+            assert (alu_source === 1'b0)   else $error("Assertion failed: alu_source != 0 (Got %b)", alu_source);
+            assert (second_add_source === 2'b00)   else $error("Assertion failed: second_add_source != 00 (Got %b)", second_add_source);
+            assert (pc_source === 1'b0)   else $error("Assertion failed: pc_source != 0 (Got %b)", pc_source);
+            assert (branch === 1'b1)   else $error("Assertion failed: branch != 1 (Got %b)", branch);
+            alu_last_bit = 1'b0; // Taken
+            #1;
+            assert (pc_source   === 1'b1)   else $error("Assertion failed: pc_source != 1 (Got %b)", pc_source);
+            assert (second_add_source === 2'b00)   else $error("Assertion failed: second_add_source != 00 (Got %b)", second_add_source);
+            $display("--> B-type BGEU Instruction Test done");
+
+            
+            test_num = 28;
             set_default_vals();
             #1;
             op = 7'b1100111; // I-type JALR
