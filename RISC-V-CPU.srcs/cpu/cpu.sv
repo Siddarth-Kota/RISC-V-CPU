@@ -21,8 +21,9 @@ module cpu (
 
     always_comb begin : second_add_select
         case (second_add_source)
-            1'b0 : pc_target = pc + immediate; //branch target
-            1'b1 : pc_target = immediate; //jump target
+            2'b00 : pc_target = pc + immediate; //branch target
+            2'b01 : pc_target = immediate; //jump target
+            2'b10 : pc_target = reg_data1 + immediate; //JALR target
         endcase
     end
 
@@ -66,7 +67,7 @@ module cpu (
     wire alu_source;
     wire [1:0] write_back_source;
     wire pc_source;
-    wire second_add_source;
+    wire [1:0] second_add_source;
     wire branch;
     wire jump;
 

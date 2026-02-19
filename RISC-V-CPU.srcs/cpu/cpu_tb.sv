@@ -336,6 +336,21 @@ module cpu_tb;
         assert (dut.Instruction != 32'h00C00413) else $error("BLT Instruction Test Failed. Expected not 00C00413, got %h", dut.Instruction);
         assert (dut.registers.reg_array[8] == 32'h00FDCDFC) else $error("BLT Instruction Test Failed. Register x8: Expected 00FDCDFC, got %h", dut.registers.reg_array[8]);
         $display("B-type BLT Instruction Test done");
+
+
+        $display("\n--> Testing I-type JALR Instruction");
+        test_num = 27;
+        assert(dut.Instruction == 32'h00000397) else $error("JALR Instruction Test Failed. Expected 00000397, got %h", dut.Instruction);
+        assert(dut.pc == 32'h0000010C) else $error("JALR Instruction Test Failed. PC: Expected 0000010C, got %h", dut.pc);
+        @(posedge clk); #0.1; //jalr x7 x0 0x0
+        @(posedge clk); #0.1; //addi x7 x7 0x14
+        assert(dut.registers.reg_array[7] == 32'h00000120) else $error("JALR Instruction Test Failed. Register x7: Expected 00000120, got %h", dut.registers.reg_array[7]);
+        @(posedge clk); #0.1; //jalr x1 -4(x7)
+        assert(dut.registers.reg_array[1] == 32'h00000118) else $error("JALR Instruction Test Failed. Register x1: Expected 00000118, got %h", dut.registers.reg_array[1]);
+        assert(dut.Instruction != 32'h00C00413) else $error("JALR Instruction Test Failed. Expected not 00C00413, got %h", dut.Instruction);
+        assert(dut.registers.reg_array[8] == 32'h00FDCDFC) else $error("JALR Instruction Test Failed. Register x8: Expected 00FDCDFC, got %h", dut.registers.reg_array[8]);
+        assert(dut.pc == 32'h0000011C) else $error("JALR Instruction Test Failed. PC: Expected 0000011C, got %h", dut.pc);
+        $display("I-type JALR Instruction Test done");
         
         $display("\n--> CPU instruction tests complete\n");
         $finish;

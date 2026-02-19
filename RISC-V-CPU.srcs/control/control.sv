@@ -14,7 +14,7 @@ module control(
     output logic alu_source, //0 - register, 1 - immediate
     output logic [1:0] write_back_source, //0 - ALU result, 1 - Memory data
     output logic pc_source, //0 - pc+4, 1 - branch target
-    output logic second_add_source,
+    output logic [1:0] second_add_source,
     output logic branch,
     output logic jump
     );
@@ -75,18 +75,25 @@ module control(
                 imm_source = 3'b010;
                 alu_op = 2'b01;
                 alu_source = 1'b0;
-                second_add_source = 1'b0;
+                second_add_source = 2'b00;
                 branch = 1'b1;
                 jump = 1'b0;
             end
-            7'b1101111 : begin //J-type
+            7'b1101111, 7'b1100111 : begin //J-type + JALR
                 reg_write = 1'b1;
-                imm_source = 3'b011;
                 mem_write = 1'b0;
                 write_back_source = 2'b10; //PC + 4
-                second_add_source = 1'b0;
                 branch = 1'b0;
                 jump = 1'b1;
+                if(op[3]) begin //Jal
+                    second_add_source = 2'b00;
+                    imm_source = 3'b011;
+                end
+                else if(~op[3]) begin //Jalr
+                    second_add_source = 2'b10;
+                    imm_source = 3'b000;
+                end
+
             end
             7'b0110111, 7'b0010111 : begin //U-type
                 reg_write = 1'b1;
@@ -96,8 +103,8 @@ module control(
                 branch = 1'b0;
                 jump = 1'b0;
                 case(op[5])
-                    1'b0: second_add_source = 1'b0; //AUIPC
-                    1'b1: second_add_source = 1'b1; //LUI
+                    1'b0: second_add_source = 2'b00; //AUIPC
+                    1'b1: second_add_source = 2'b01; //LUI
                 endcase
             end
             default: begin
