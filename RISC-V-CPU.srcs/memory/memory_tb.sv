@@ -14,6 +14,8 @@ module memory_tb;
     logic write_enable;
     logic [31:0] address;
     logic [31:0] write_data;
+    logic [3:0] byte_enable;
+
     logic [31:0] read_data;
 
     //Instantiate DUT
@@ -25,6 +27,8 @@ module memory_tb;
         .write_enable(write_enable),
         .address(address),
         .write_data(write_data),
+        .byte_enable(byte_enable),
+
         .read_data(read_data)
     );
 
@@ -50,7 +54,7 @@ module memory_tb;
         @(posedge clk);
 
         //check 0 after reset
-        $display("Checking memory reset...");
+        $display("\n--> Checking memory reset...");
         for(int i = 0; i < WORDS; i = i + 1) begin
             address = i * 4;
             @(posedge clk) #1;
@@ -60,7 +64,7 @@ module memory_tb;
 
         //write and read test
         test_num = 2;
-        $display("Starting write and read test...");
+        $display("\n--> Starting write and read test...");
         write_and_check(0, 32'hDEADBEEF);
         write_and_check(4, 32'hCAFEBABE);
         write_and_check(8, 32'h12345678);
@@ -69,7 +73,7 @@ module memory_tb;
 
         //write to multiple addresses
         test_num = 3;
-        $display("Starting multiple address write and read test...");
+        $display("\n--> Starting multiple address write and read test...");
         //write
         for(int i = 4; i < 40; i = i + 4) begin
             @(negedge clk);
@@ -89,7 +93,9 @@ module memory_tb;
             assert (read_data === (i * 3)) else $error("Test Failed: Data mismatch at address %0d. Expected: %0h, Got: %0h", address, (i * 3), read_data);
         end
         $display("Multiple address write and read test done.");
-        $display("All tests done.");
+
+
+        $display("\nAll tests done.\n");
         $finish;
     end
 

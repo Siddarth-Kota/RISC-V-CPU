@@ -9,6 +9,8 @@ module memory #(
     input logic write_enable, //allow write when high
     input logic [31:0] address,
     input logic [31:0] write_data,
+    input logic [3:0] byte_enable,
+
     output logic [31:0] read_data
     );
 
@@ -29,9 +31,15 @@ module memory #(
             end
         end
         else if (write_enable) begin
-            //check for valid address (div by 4 and within range)
-            if(address[1:0] == 2'b00 && (address[31:2] < WORDS)) begin
-                mem_array[address[31:2]] <= write_data;
+            if(address[1:0] != 2'b00 || (address[31:2] >= WORDS)) begin
+                $display("ERROR: Misaligned or out-of-bounds address: %h", address);
+            end
+            else begin
+                for (int i = 0; i < 4; i++) begin
+                    if(byte_enable[i]) begin
+                        mem_array[address[31:2]][i*8 +: 8] <= write_data[i*8 +: 8];
+                    end
+                end
             end
         end
     end
