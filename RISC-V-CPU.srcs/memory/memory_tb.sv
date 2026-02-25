@@ -55,7 +55,7 @@ module memory_tb;
 
         //check 0 after reset
         $display("\n--> Checking memory reset...");
-        for(int i = 0; i < WORDS; i = i + 1) begin
+        for(int i = 0; i < WORDS; i++) begin
             address = i * 4;
             @(posedge clk) #1;
             assert (read_data === 32'b0) else $error("Test Failed: Memory not reset (0) at address %0d", address);
@@ -65,6 +65,7 @@ module memory_tb;
         //write and read test
         test_num = 2;
         $display("\n--> Starting write and read test...");
+        byte_enable = 4'b1111;
         write_and_check(0, 32'hDEADBEEF);
         write_and_check(4, 32'hCAFEBABE);
         write_and_check(8, 32'h12345678);
@@ -94,7 +95,22 @@ module memory_tb;
         end
         $display("Multiple address write and read test done.");
 
-
+        //byte enable test
+        test_num = 4;
+        $display("\n--> Starting Byte enable test...");
+        
+        for (int b = 0; b < 16; b++) begin
+            @(negedge clk);
+            rst_n = 0;
+            @(negedge clk);
+            rst_n = 1;
+            @(posedge clk);
+            write_and_check_b(32'h0000_0000, 32'hDEADBEEF, b[3:0]);
+            write_and_check_b(32'h0000_0004, 32'hCAFEBA11, b[3:0]);
+        end
+        $display("Byte enable test done.");
+            
+        test_num = 0;
         $display("\nAll tests done.\n");
         $finish;
     end
@@ -114,6 +130,33 @@ module memory_tb;
             //read
             @(posedge clk) #1;
             assert (read_data === data) else $error("Test Failed: Data mismatch at address %0d. Expected: %0h, Got: %0h", addr, data, read_data);
+        end
+    endtask
+
+    task write_and_check_b(input logic [31:0] addr, input logic [31:0] data, input logic [3:0] b);
+        begin
+            //calculate mask
+            logic [31:0] expected_mask;
+            expected_mask = 32'h0;
+            for (int j = 0; j < 4; j++) begin
+                if ((b >> j) & 1'b1) begin
+                    expected_mask |= (32'hFF << (j * 8));
+                end
+            end
+
+            //Write
+            @(posedge clk);
+            write_enable = 1;
+            byte_enable = b;
+            address = addr;
+            write_data = data;
+
+            @(posedge clk);
+            write_enable = 0;
+            
+            //Read
+            @(posedge clk) #1;
+            assert (read_data === (data & expected_mask)) else $error("Test Failed: Addr %0h | BE %0b | Expected: %0h, Got: %0h", addr, b, (data & expected_mask), read_data);
         end
     endtask
 endmodule
