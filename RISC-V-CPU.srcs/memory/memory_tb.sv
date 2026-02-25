@@ -99,14 +99,14 @@ module memory_tb;
         test_num = 4;
         $display("\n--> Starting Byte enable test...");
         
-        for (int b = 0; b < 16; b++) begin
+        for (int be = 0; be < 16; be++) begin
             @(negedge clk);
             rst_n = 0;
             @(negedge clk);
             rst_n = 1;
             @(posedge clk);
-            write_and_check_b(32'h0000_0000, 32'hDEADBEEF, b[3:0]);
-            write_and_check_b(32'h0000_0004, 32'hCAFEBA11, b[3:0]);
+            write_and_check_be(32'h0000_0000, 32'hDEADBEEF, be[3:0]);
+            write_and_check_be(32'h0000_0004, 32'hCAFEBA11, be[3:0]);
         end
         $display("Byte enable test done.");
             
@@ -133,13 +133,13 @@ module memory_tb;
         end
     endtask
 
-    task write_and_check_b(input logic [31:0] addr, input logic [31:0] data, input logic [3:0] b);
+    task write_and_check_be(input logic [31:0] addr, input logic [31:0] data, input logic [3:0] be);
         begin
             //calculate mask
             logic [31:0] expected_mask;
             expected_mask = 32'h0;
             for (int j = 0; j < 4; j++) begin
-                if ((b >> j) & 1'b1) begin
+                if ((be >> j) & 1'b1) begin
                     expected_mask |= (32'hFF << (j * 8));
                 end
             end
@@ -147,7 +147,7 @@ module memory_tb;
             //Write
             @(posedge clk);
             write_enable = 1;
-            byte_enable = b;
+            byte_enable = be;
             address = addr;
             write_data = data;
 
@@ -156,7 +156,7 @@ module memory_tb;
             
             //Read
             @(posedge clk) #1;
-            assert (read_data === (data & expected_mask)) else $error("Test Failed: Addr %0h | BE %0b | Expected: %0h, Got: %0h", addr, b, (data & expected_mask), read_data);
+            assert (read_data === (data & expected_mask)) else $error("Test Failed: Addr %0h | BE %0b | Expected: %0h, Got: %0h", addr, be, (data & expected_mask), read_data);
         end
     endtask
 endmodule

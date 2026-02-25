@@ -157,6 +157,17 @@ module cpu (
         .last_bit(alu_last_bit)
     );
 
+    wire [3:0] mem_byte_enable;
+
+    be_decoder be_decode(
+        .alu_result_address(alu_result),
+        .func3(func3),
+        .reg_read(reg_data2),
+
+        .byte_enable(mem_byte_enable),
+        .data(mem_write_data)
+    );
+
     //Data Memory
     wire [31:0] mem_read;
 
@@ -166,8 +177,9 @@ module cpu (
         .clk(clk),
         .rst_n(1'b1),
         .write_enable(mem_write),
-        .address(alu_result),
+        .address({alu_result[31:2], 2'b00}),
         .write_data(reg_data2),
+        .byte_enable(mem_byte_enable),
 
         .read_data(mem_read)
     );
