@@ -6,7 +6,7 @@ module cpu_tb;
     logic rst_n;
 
     //debug
-    logic [4:0] test_num = 0;
+    logic [5:0] test_num = 0;
 
     cpu dut (
         .clk(clk),
@@ -403,7 +403,17 @@ module cpu_tb;
         assert(dut.registers.reg_array[8] == 32'h00FDCDFC) else $error("JALR Instruction Test Failed. Register x8: Expected 00FDCDFC, got %h", dut.registers.reg_array[8]);
         assert(dut.pc == 32'h0000011C) else $error("JALR Instruction Test Failed. PC: Expected 0000011C, got %h", dut.pc);
         $display("I-type JALR Instruction Test done");
-        
+
+
+        $display("\n--> Testing S-type SB Instruction");
+        test_num = 32;
+        assert (dut.Instruction == 32'h008020A3) else $error("SB Instruction Test Failed. Expected 008020A3, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //sw x8 0x1(x0)
+        assert (dut.data_memory.mem_array[1] == 32'h00000000) else $error("SB Instruction Test Failed. Memory[1]: Expected 00000000, got %h", dut.data_memory.mem_array[1]);
+        @(posedge clk); #0.1; //sb x8 0x6(x0)
+        assert (dut.data_memory.mem_array[1] == 32'h00FC0000) else $error("SB Instruction Test Failed. Memory[1]: Expected 00FC0000, got %h", dut.data_memory.mem_array[1]);
+        $display("S-type SB Instruction Test done");
+
         test_num = 0;
         $display("\n--> CPU instruction tests complete\n");
         $finish;

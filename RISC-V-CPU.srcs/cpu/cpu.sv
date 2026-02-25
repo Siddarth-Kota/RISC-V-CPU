@@ -158,6 +158,7 @@ module cpu (
     );
 
     wire [3:0] mem_byte_enable;
+    wire [31:0] mem_write_data;
 
     be_decoder be_decode(
         .alu_result_address(alu_result),
@@ -178,7 +179,7 @@ module cpu (
         .rst_n(1'b1),
         .write_enable(mem_write),
         .address({alu_result[31:2], 2'b00}),
-        .write_data(reg_data2),
+        .write_data(mem_write_data),
         .byte_enable(mem_byte_enable),
 
         .read_data(mem_read)
