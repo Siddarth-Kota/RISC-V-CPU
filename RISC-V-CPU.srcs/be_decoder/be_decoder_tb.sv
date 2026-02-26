@@ -77,6 +77,32 @@ module be_decoder_tb;
         end
         $display("SB Test done.");
 
+
+        test_num = 3;
+        $display("\n--> Test 3: SH");
+        func3 = 3'b001; //SH
+        for(int i = 0; i < 100; i++) begin
+            reg_data = $urandom() & 32'hFFFFFFFF;
+            reg_read = reg_data;
+            for(int offset = 0; offset < 4; offset++) begin
+                alu_result_address = test_word | offset;
+                #1;
+                if(offset == 2'b00) begin
+                    assert (byte_enable == 4'b0011) else $error("Test %d Failed: Expected byte_enable 0011, got %b", test_num, byte_enable);
+                    assert (data == (reg_data & 32'h0000FFFF)) else $error("Test %d Failed: Expected data %h, got %h", test_num, reg_data & 32'h0000FFFF, data);
+                end
+                else if(offset == 2'b10) begin
+                    assert (data == ((reg_data & 32'h0000FFFF) << 16)) else $error("Test %d Failed: Expected data %h, got %h", test_num, (reg_data & 32'h0000FFFF) << 16, data);
+                    assert (byte_enable == 4'b1100) else $error("Test %d Failed: Expected byte_enable 1100, got %b", test_num, byte_enable);
+                end
+                else begin
+                    assert (byte_enable == 4'b0000) else $error("Test %d Failed: Expected byte_enable 0000, got %b", test_num, byte_enable);
+                end
+            end
+        end
+        $display("SH Test done.");
+
+
         test_num = 0;
         $display("\n--> All tests done.");
         $finish;
