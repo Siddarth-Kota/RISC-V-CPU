@@ -35,7 +35,7 @@ module cpu (
         end
     end
 
-    // Instruction Memory
+    //Instruction Memory
     wire [31:0] Instruction;
 
     memory #(
@@ -50,7 +50,7 @@ module cpu (
         .read_data(Instruction)
     );
 
-    // Control
+    //Control
     logic [6:0] op;
     assign op = Instruction[6:0];
     logic [2:0] func3;
@@ -91,21 +91,33 @@ module cpu (
         .jump(jump)  
     );
 
-    //RegFile
+    //Registers
     logic [4:0] rs1, rs2, rd;
     assign rs1 = Instruction[19:15];
     assign rs2 = Instruction[24:20];
     assign rd = Instruction[11:7];
     wire [31:0] reg_data1, reg_data2;
     
+    logic wb_valid;
     logic [31:0] write_data;
     always_comb begin : wbSelect
         case (write_back_source)
-            2'b00 : write_data = alu_result;
-            2'b01 : write_data = mem_read;
-            2'b10 : write_data = pc_plus4;
-            2'b11 : write_data = pc_target;
-            default : write_data = alu_result;
+            2'b00 : begin
+                write_data = alu_result;
+                wb_valid = 1'b1;
+            end
+            2'b01 : begin
+                write_data = mem_read_wb_data;
+                wb_valid = mem_read_wb_valid;
+            end
+            2'b10 : begin
+                write_data = pc_plus4;
+                wb_valid = 1'b1;
+            end
+            2'b11 : begin
+                write_data = pc_target;
+                wb_valid = 1'b1;
+            end
         endcase
     end
 
@@ -119,7 +131,7 @@ module cpu (
         .read_data1(reg_data1),
         .read_data2(reg_data2),
 
-        .write_enable(reg_write),
+        .write_enable(reg_write & wb_valid),
         .write_data(write_data),
         .write_address(rd)
     );
@@ -176,13 +188,26 @@ module cpu (
         .mem_init("data_mem_test.hex")
     ) data_memory (
         .clk(clk),
-        .rst_n(1'b1),
-        .write_enable(mem_write),
         .address({alu_result[31:2], 2'b00}),
         .write_data(mem_write_data),
+        .write_enable(mem_write),
         .byte_enable(mem_byte_enable),
+        .rst_n(1'b1),
 
         .read_data(mem_read)
+    );
+
+    //Reader
+    wire [31:0] mem_read_wb_data;
+    wire mem_read_wb_valid;
+
+    reader reader (
+        .mem_data(mem_read),
+        .be_mask(mem_byte_enable),
+        .func3(func3),
+
+        .wb_data(mem_read_wb_data),
+        .valid(mem_read_wb_valid)
     );
 
 endmodule

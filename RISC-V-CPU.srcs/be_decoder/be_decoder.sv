@@ -15,7 +15,7 @@ module be_decoder (
 
     always_comb begin
         case(func3)
-            3'b000: begin //SB
+            3'b000, 3'b100: begin //SB, LB, LBU
                 case(offset)
                     2'b00: begin
                         byte_enable = 4'b0001;
@@ -37,7 +37,7 @@ module be_decoder (
                 endcase
             end
 
-            3'b001: begin //SH
+            3'b001, 3'b101: begin //SH, LH, LHU
                 case(offset)
                     2'b00: begin
                         byte_enable = 4'b0011;
