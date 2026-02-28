@@ -71,9 +71,9 @@ FFC380E7  //                        jalr x1 -4(x7)                  | x1 <= 0000
 00C00413  //                        addi x8 x0 0xC                  | NEVER EXECUTED (check value)  PC = 0x118
 008020A3  //SB TEST START :         sw x8 0x1(x0)                   | Shouldn't write since misaligned
 00800323  //                        sb x8 0x6(x0)                   | 0x4 <= 00FC0000
-008010A3  //SH TEST START :         sh x8 1(x0)                     | Shouldn't write since misaligned
-008011A3  //                        sh x8 3(x0)                     | Shouldn't write since misaligned
-00801323  //                        sh x8 6(x0)                     | mem @ 0x4 <= FFEE0000  
+008010A3  //SH TEST START :         sh x8 0x1(x0)                   | Shouldn't write since misaligned
+008011A3  //                        sh x8 0x3(x0)                   | Shouldn't write since misaligned
+00801323  //                        sh x8 0x6(x0)                   | mem @ 0x4 <= CDFC0000  
 00000013  //NOP
 00000013  //NOP
 00000013  //NOP

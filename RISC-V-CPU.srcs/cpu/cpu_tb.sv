@@ -414,6 +414,17 @@ module cpu_tb;
         assert (dut.data_memory.mem_array[1] == 32'h00FC0000) else $error("SB Instruction Test Failed. Memory[1]: Expected 00FC0000, got %h", dut.data_memory.mem_array[1]);
         $display("S-type SB Instruction Test done");
 
+        $display("\n--> Testing S-type SH Instruction");
+        test_num = 33;
+        assert (dut.Instruction == 32'h008010A3) else $error("SH Instruction Test Failed. Expected 008010A3, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //sh x8 0x1(x0)
+        assert (dut.data_memory.mem_array[1] == 32'h00FC0000) else $error("SH Instruction Test Failed. Memory[1]: Expected 00FC0000, got %h", dut.data_memory.mem_array[1]);
+        @(posedge clk); #0.1; //sh x8 0x3(x0)
+        assert (dut.data_memory.mem_array[1] == 32'h00FC0000) else $error("SH Instruction Test Failed. Memory[1]: Expected 00FC0000, got %h", dut.data_memory.mem_array[1]);
+        @(posedge clk); #0.1; //sh x8 0x6(x0)
+        assert (dut.data_memory.mem_array[1] == 32'hCDFC0000) else $error("SH Instruction Test Failed. Memory[1]: Expected CDFC0000, got %h", dut.data_memory.mem_array[1]);
+        $display("S-type SH Instruction Test done");
+
         test_num = 0;
         $display("\n--> CPU instruction tests complete\n");
         $finish;
