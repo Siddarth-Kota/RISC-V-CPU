@@ -74,14 +74,14 @@ FFC380E7  //                        jalr x1 -4(x7)                  | x1 <= 0000
 008010A3  //SH TEST START :         sh x8 0x1(x0)                   | Shouldn't write since misaligned
 008011A3  //                        sh x8 0x3(x0)                   | Shouldn't write since misaligned
 00801323  //                        sh x8 0x6(x0)                   | mem @ 0x4 <= CDFC0000  
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
+01000393  //LB TEST START :         addi x7 x0 0x10                 | x7 <= 00000010
+FFF3A903  //                        lw x18 -1(x7)                   | Shouldn't write since misaligned
+FFF38903  //                        lb x18 -1(x7)                   | x18 <= FFFFFFAF
+FFD3C983  //LBU TEST START :        lbu x19 -3(x7)                  | x19 <= 000000AF 
+FFD39A03  //LH TEST START :         lh x20 -3(x7)                   | Shouldn't write since misaligned
+FFA39A03  //                        lh x20 -6(x7)                   | x20 <= FFFFAFAF
+FFD3DA83  //LHU TEST START :        lhu x21 -3(x7)                  | Shouldn't write since misaligned
+FFA3DA83  //                        lhu x21 -6(x7)                  | x21 <= 0000AFAF
 00000013  //NOP
 00000013  //NOP
 00000013  //NOP
