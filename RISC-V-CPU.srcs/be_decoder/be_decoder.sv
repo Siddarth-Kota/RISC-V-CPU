@@ -9,6 +9,8 @@ module be_decoder (
     output logic [31:0] data
     );
 
+    import signal_pkg::*;
+
     logic [1:0] offset;
 
     assign offset = alu_result_address[1:0];

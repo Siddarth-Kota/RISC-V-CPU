@@ -3,7 +3,9 @@
 module cpu (
     input logic clk,
     input logic rst_n
-);
+    );
+
+    import signal_pkg::*;
 
     // Program Counter
     reg [31:0] pc;
@@ -46,6 +48,7 @@ module cpu (
         .write_enable(1'b0),
         .address(pc),
         .write_data(32'b0),
+        .byte_enable(4'b0000),
         
         .read_data(Instruction)
     );

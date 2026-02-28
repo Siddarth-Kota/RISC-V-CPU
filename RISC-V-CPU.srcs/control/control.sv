@@ -19,6 +19,8 @@ module control(
     output logic jump
     );
 
+    import signal_pkg::*;
+
     //Main Decoder
     logic [1:0] alu_op;
     always_comb begin
