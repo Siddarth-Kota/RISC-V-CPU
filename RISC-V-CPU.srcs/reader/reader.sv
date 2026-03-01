@@ -8,6 +8,9 @@ module reader (
     output logic [31:0] wb_data,
     output logic valid
     );
+
+    import signal_pkg::*;
+
     logic sign_extend;
     assign sign_extend = ~func3[2];
 
@@ -26,8 +29,8 @@ module reader (
 
     always_comb begin : shift_data
         case (func3)
-            3'b010 : raw_data = masked_data; //LW
-            3'b000, 3'b100: begin //LB, LBU
+            FUNC3_WORD : raw_data = masked_data;
+            FUNC3_BYTE, FUNC3_BYTE_U: begin
                 case(be_mask)
                     4'b0001: raw_data = masked_data;
                     4'b0010: raw_data = masked_data >> 8;
@@ -35,7 +38,7 @@ module reader (
                     4'b1000: raw_data = masked_data >> 24;
                 endcase
             end
-            3'b001, 3'b101: begin //LH, LHU
+            FUNC3_HALFWORD, FUNC3_HALFWORD_U: begin
                 case(be_mask)
                     4'b0011: raw_data = masked_data;
                     4'b1100: raw_data = masked_data >> 16;
@@ -46,9 +49,10 @@ module reader (
 
     always_comb begin : sign_extend_logic
         case(func3)
-            3'b010: wb_data = raw_data; //LW
-            3'b000, 3'b100: wb_data = sign_extend ? {{24{raw_data[7]}}, raw_data[7:0]} : raw_data; //LB, LBU
-            3'b001, 3'b101: wb_data = sign_extend ? {{16{raw_data[15]}}, raw_data[15:0]} : raw_data; //LH, LHU
+            FUNC3_WORD: wb_data = raw_data; //LW
+            FUNC3_BYTE, FUNC3_BYTE_U: wb_data = sign_extend ? {{24{raw_data[7]}}, raw_data[7:0]} : raw_data; //LB, LBU
+            FUNC3_HALFWORD, FUNC3_HALFWORD_U: wb_data = sign_extend ? {{16{raw_data[15]}}, raw_data[15:0]} : raw_data; //LH, LHU
+            default: wb_data = 32'b0;
         endcase
         valid = |be_mask;
     end

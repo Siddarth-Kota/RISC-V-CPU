@@ -25,44 +25,44 @@ module control(
     logic [1:0] alu_op;
     always_comb begin
         case (op)
-            7'b0000011: begin //I-type
+            OPCODE_I_TYPE: begin
                 reg_write = 1'b1;
                 mem_write = 1'b0;
-                imm_source = 3'b000;
+                imm_source = IMM_I_TYPE;
                 alu_op = 2'b00;
                 alu_source = 1'b1;
                 write_back_source = 2'b01;
                 branch = 1'b0;
                 jump = 1'b0;
             end
-            7'b0010011: begin //I-type ALU
+            OPCODE_I_TYPE_ALU: begin
                 mem_write = 1'b0;
-                imm_source = 3'b000;
+                imm_source = IMM_I_TYPE;
                 alu_op = 2'b10;
                 alu_source = 1'b1; //immediate
                 write_back_source = 2'b00; //alu result
                 branch = 1'b0;
                 jump = 1'b0;
                 if (func3 == 3'b001) begin
-                    reg_write = (func7 == 7'b0000000) ? 1'b1 : 1'b0; //SLLI valid only if func7 is 0000000
+                    reg_write = (func7 == FUNC7_SLL_SRL) ? 1'b1 : 1'b0;
                 end
                 else if (func3 == 3'b101) begin
-                    reg_write = (func7 == 7'b0000000 || func7 == 7'b0100000) ? 1'b1 : 1'b0; //SRLI/SRAI valid only if func7 is 0000000 or 0100000
+                    reg_write = (func7 == FUNC7_SLL_SRL || func7 == FUNC7_SRA) ? 1'b1 : 1'b0;
                 end
                 else begin
                     reg_write = 1'b1;
                 end
             end
-            7'b0100011: begin //S-type
+            OPCODE_S_TYPE: begin
                 reg_write = 1'b0;
                 mem_write = 1'b1;
-                imm_source = 3'b001;
+                imm_source = IMM_S_TYPE;
                 alu_op = 2'b00;
                 alu_source = 1'b1;
                 branch = 1'b0;
                 jump = 1'b0;
             end
-            7'b0110011 : begin //R-type
+            OPCODE_R_TYPE : begin
                 reg_write = 1'b1;
                 mem_write = 1'b0;
                 alu_op = 2'b10;
@@ -71,17 +71,17 @@ module control(
                 branch = 1'b0;
                 jump = 1'b0;
             end
-            7'b1100011 : begin //B-type
+            OPCODE_B_TYPE : begin
                 reg_write = 1'b0;
                 mem_write = 1'b0;
-                imm_source = 3'b010;
+                imm_source = IMM_B_TYPE;
                 alu_op = 2'b01;
                 alu_source = 1'b0;
                 second_add_source = 2'b00;
                 branch = 1'b1;
                 jump = 1'b0;
             end
-            7'b1101111, 7'b1100111 : begin //J-type + JALR
+            OPCODE_J_TYPE, OPCODE_J_TYPE_JALR : begin
                 reg_write = 1'b1;
                 mem_write = 1'b0;
                 write_back_source = 2'b10; //PC + 4
@@ -89,17 +89,17 @@ module control(
                 jump = 1'b1;
                 if(op[3]) begin //Jal
                     second_add_source = 2'b00;
-                    imm_source = 3'b011;
+                    imm_source = IMM_J_TYPE;
                 end
                 else if(~op[3]) begin //Jalr
                     second_add_source = 2'b10;
-                    imm_source = 3'b000;
+                    imm_source = IMM_I_TYPE;
                 end
 
             end
-            7'b0110111, 7'b0010111 : begin //U-type
+            OPCODE_U_TYPE_LUI, OPCODE_U_TYPE_AUIPC : begin
                 reg_write = 1'b1;
-                imm_source = 3'b100;
+                imm_source = IMM_U_TYPE;
                 mem_write = 1'b0;
                 write_back_source = 2'b11; //U-type immediate
                 branch = 1'b0;
@@ -109,15 +109,17 @@ module control(
                     1'b1: second_add_source = 2'b01; //LUI
                 endcase
             end
-            default: begin
-                reg_write = 1'b0;
-                mem_write = 1'b0;
-                imm_source = 3'b000;
-                alu_op = 2'b00;
-                alu_source = 1'b0;
-                branch = 1'b0;
-                jump = 1'b0;
-                write_back_source = 2'b00;
+            default: begin //Invalid instruction
+                reg_write = 1'bx;
+                mem_write = 1'bx;
+                imm_source = 3'bxxx;
+                alu_op = 2'bxx;
+                alu_source = 1'bx;
+                branch = 1'bx;
+                jump = 1'bx;
+                write_back_source = 2'bxx;
+                second_add_source = 2'bxx;
+                pc_source = 1'bx;
             end
         endcase
     end
@@ -125,33 +127,33 @@ module control(
     //ALU Decoder
     always_comb begin
         case (alu_op)
-            2'b00 : alu_control = 4'b0000; //LW,SW: ADD
-            2'b10 : begin //R-type and I-type ALU
-                case(func3)
-                    3'b000 : begin
-                        if(op == 7'b0110011) begin //R-type
-                            alu_control = func7[5] ? 4'b0001 : 4'b0000; //SUB : ADD
-                        end
-                        else begin //I-type ALU
-                            alu_control = 4'b0000; //ADDI
-                        end
-                    end
-                    3'b001 : alu_control = 4'b0100; //SLL
-                    3'b010 : alu_control = 4'b0101; //SLT
-                    3'b011 : alu_control = 4'b0111; //SLTU
-                    3'b100 : alu_control = 4'b1000; //XOR
-                    3'b101 : if(func7 == 7'b0000000) alu_control = 4'b0110; //SRL
-                             else if(func7 == 7'b0100000) alu_control = 4'b1001; //SRA
-                             else alu_control = 4'bxxxx; //Invalid
-                    3'b110 : alu_control = 4'b0011; //OR
-                    3'b111 : alu_control = 4'b0010; //AND
+            ALU_OP_LOAD_STORE : alu_control = ALU_ADD;  
+            ALU_OP_BRANCHES : begin
+                case (func3)
+                    FUNC3_BEQ, FUNC3_BNE : alu_control = ALU_SUB;
+                    FUNC3_BLT, FUNC3_BGE : alu_control = ALU_SLT;
+                    FUNC3_BLTU, FUNC3_BGEU : alu_control = ALU_SLTU;
                 endcase
             end
-            2'b01 : begin
-                case (func3)
-                    3'b000, 3'b001 : alu_control = 4'b0001; //BEQ, BNE
-                    3'b100, 3'b101 : alu_control = 4'b0101; //BLT, BGE
-                    3'b110, 3'b111 : alu_control = 4'b0111; //BLTU, BGEU
+            ALU_OP_MATH : begin //R-type and I-type ALU
+                case(func3)
+                    FUNC3_ADD_SUB : begin
+                        if(op == OPCODE_R_TYPE) begin
+                            alu_control = func7[5] ? ALU_SUB : ALU_ADD;
+                        end
+                        else begin //I-type ALU
+                            alu_control = ALU_ADD;
+                        end
+                    end
+                    FUNC3_SLL : alu_control = ALU_SLL; 
+                    FUNC3_SLT : alu_control = ALU_SLT;
+                    FUNC3_SLTU : alu_control = ALU_SLTU;
+                    FUNC3_XOR : alu_control = ALU_XOR;
+                    FUNC3_SRL_SRA : if(func7 == FUNC7_SLL_SRL) alu_control = ALU_SRL;
+                                    else if(func7 == FUNC7_SRA) alu_control = ALU_SRA;
+                                    else alu_control = 4'bxxxx; //Invalid
+                    FUNC3_OR : alu_control = ALU_OR;
+                    FUNC3_AND : alu_control = ALU_AND;
                 endcase
             end
         endcase
@@ -159,15 +161,14 @@ module control(
 
     //PC Source Logic
     logic assert_branch;
-
     always_comb begin : branch_logic_decode
         case(func3)
-            3'b000: assert_branch = branch & alu_zero; //BEQ
-            3'b001: assert_branch = branch & ~alu_zero; //BNE
-            3'b100, 3'b110: assert_branch = alu_last_bit & branch; //BLT, BLTU
-            3'b101, 3'b111: assert_branch = ~alu_last_bit & branch; //BGE, BGEU
+            FUNC3_BEQ: assert_branch = branch & alu_zero;
+            FUNC3_BNE: assert_branch = branch & ~alu_zero;
+            FUNC3_BLT, FUNC3_BLTU: assert_branch = alu_last_bit & branch;
+            FUNC3_BGE, FUNC3_BGEU: assert_branch = ~alu_last_bit & branch;
             default: assert_branch = 1'b0;
         endcase
     end
-    assign pc_source = (assert_branch & (op == 7'b1100011)) | jump;
+    assign pc_source = (assert_branch & (op == OPCODE_B_TYPE)) | jump;
 endmodule

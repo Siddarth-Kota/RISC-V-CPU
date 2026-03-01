@@ -17,7 +17,7 @@ module be_decoder (
 
     always_comb begin
         case(func3)
-            3'b000, 3'b100: begin //SB, LB, LBU
+            FUNC3_BYTE, FUNC3_BYTE_U: begin
                 case(offset)
                     2'b00: begin
                         byte_enable = 4'b0001;
@@ -39,7 +39,7 @@ module be_decoder (
                 endcase
             end
 
-            3'b001, 3'b101: begin //SH, LH, LHU
+            FUNC3_HALFWORD, FUNC3_HALFWORD_U: begin
                 case(offset)
                     2'b00: begin
                         byte_enable = 4'b0011;
@@ -53,13 +53,13 @@ module be_decoder (
                 endcase
             end
             
-            3'b010: begin //SW
+            FUNC3_WORD: begin
                 byte_enable = (offset == 2'b00) ? 4'b1111 : 4'b0000;
                 data = reg_read;
             end
 
             default: begin
-                byte_enable = 4'b0000;
+                byte_enable = 4'b0000; //invalid instruction, no bytes enabled
             end
         endcase
     end

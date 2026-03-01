@@ -10,18 +10,20 @@ module ALU (
     output logic last_bit
     );
 
+    import signal_pkg::*;
+
     always_comb begin
         case(alu_control)
-            4'b0000 : alu_result = operand1 + operand2; //ADD
-            4'b0001 : alu_result = operand1 + (~operand2 + 1'b1); //SUB
-            4'b0010 : alu_result = operand1 & operand2; //AND
-            4'b0011 : alu_result = operand1 | operand2; //OR
-            4'b0100 : alu_result = operand1 << operand2[4:0]; //SLL
-            4'b0101 : alu_result = {31'b0, $signed(operand1) < $signed(operand2)}; //SLT
-            4'b0110 : alu_result = operand1 >> operand2[4:0]; //SRL
-            4'b0111 : alu_result = {31'b0, operand1 < operand2}; //SLTU
-            4'b1001 : alu_result = $signed(operand1) >>> operand2[4:0]; //SRA
-            4'b1000 : alu_result = operand1 ^ operand2; //XOR
+            ALU_ADD : alu_result = operand1 + operand2;
+            ALU_SUB : alu_result = operand1 + (~operand2 + 1'b1);
+            ALU_AND : alu_result = operand1 & operand2;
+            ALU_OR : alu_result = operand1 | operand2;
+            ALU_SLL : alu_result = operand1 << operand2[4:0];
+            ALU_SLT : alu_result = {31'b0, $signed(operand1) < $signed(operand2)};
+            ALU_SRL : alu_result = operand1 >> operand2[4:0];
+            ALU_SLTU : alu_result = {31'b0, operand1 < operand2};
+            ALU_SRA : alu_result = $signed(operand1) >>> operand2[4:0];
+            ALU_XOR : alu_result = operand1 ^ operand2;
             default: alu_result = 32'b0;
         endcase
     end

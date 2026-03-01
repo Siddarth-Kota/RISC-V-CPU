@@ -1,11 +1,11 @@
 `timescale 1ns / 1ps
 
-package signal_pkg
+package signal_pkg;
     // INSTRUCTION OP CODES
     typedef enum logic [6:0] {
         OPCODE_R_TYPE         = 7'b0110011,
         OPCODE_I_TYPE_ALU     = 7'b0010011,
-        OPCODE_I_TYPE_LOAD    = 7'b0000011,
+        OPCODE_I_TYPE         = 7'b0000011,
         OPCODE_S_TYPE         = 7'b0100011,
         OPCODE_B_TYPE         = 7'b1100011,
         OPCODE_U_TYPE_LUI     = 7'b0110111,
@@ -28,8 +28,7 @@ package signal_pkg
         FUNC3_SLT             = 3'b010,
         FUNC3_SLTU            = 3'b011,
         FUNC3_XOR             = 3'b100,
-        FUNC3_SRL             = 3'b101,
-        FUNC3_SRA             = 3'b101,
+        FUNC3_SRL_SRA         = 3'b101,
         FUNC3_OR              = 3'b110,
         FUNC3_AND             = 3'b111
     } funct3_t;
@@ -46,20 +45,16 @@ package signal_pkg
 
     //Load/Store funct3 codes
     typedef enum logic [2:0] {
-        FUNC3_LB              = 3'b000,
-        FUNC3_LH              = 3'b001,
-        FUNC3_LW              = 3'b010,
-        FUNC3_LBU             = 3'b100,
-        FUNC3_LHU             = 3'b101,
-        FUNC3_SB              = 3'b000,
-        FUNC3_SH              = 3'b001,
-        FUNC3_SW              = 3'b010
+        FUNC3_WORD            = 3'b010,
+        FUNC3_BYTE            = 3'b000,
+        FUNC3_BYTE_U          = 3'b100,
+        FUNC3_HALFWORD        = 3'b001,
+        FUNC3_HALFWORD_U      = 3'b101
     } mem_funct3_t;
 
     //Shift funct7 codes
     typedef enum logic [6:0] {
-        FUNC7_SRL             = 7'b0000000,
-        FUNC7_SLL             = 7'b0000000,
+        FUNC7_SLL_SRL         = 7'b0000000,
         FUNC7_SRA             = 7'b0100000
     } shifts_funct7_t;
 
@@ -82,5 +77,14 @@ package signal_pkg
         ALU_XOR               = 4'b1000,
         ALU_SRA               = 4'b1001
     } alu_control_t;
+
+    //IMMEDIATE GENERATOR SOURCES
+    typedef enum logic [2:0] {
+        IMM_I_TYPE            = 3'b000,
+        IMM_S_TYPE            = 3'b001,
+        IMM_B_TYPE            = 3'b010,
+        IMM_J_TYPE            = 3'b011,
+        IMM_U_TYPE            = 3'b100
+    } imm_source_t;
     
 endpackage
