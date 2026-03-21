@@ -1,0 +1,196 @@
+`timescale 1ns / 1ps
+
+module ALU_tb;
+
+    logic [3:0] alu_control;
+    logic [31:0] operand1;
+    logic [31:0] operand2;
+    logic [31:0] alu_result;
+    logic zero;
+    logic last_bit;
+
+
+    //debug
+    logic [3:0] test_num = -1;
+    logic [31:0] expected;
+
+    ALU dut (
+        .alu_control(alu_control),
+        .operand1(operand1),
+        .operand2(operand2),
+        
+        .alu_result(alu_result),
+        .zero(zero),
+        .last_bit(last_bit)
+    );
+
+    //test logic
+    initial begin
+        $display("Starting ALU Testbench...");
+        
+        //default case test
+        $display("Test 0: default case"); //should output 0
+        test_num = 0;
+        alu_control = 4'b1111; //undefined operation
+        operand1 = $urandom();
+        operand2 = $urandom();
+        #1
+        $display("Result of %d + %d = %d with control %d", operand1, operand2, alu_result, alu_control);
+        assert (zero === 1'b1) else $error("Test Failed: Zero flag not set correctly for default case.");
+        assert (alu_result === 32'b0) else $error("Test Failed: ALU result not zero for default case.");
+        $display("Test 0 done.");
+
+        //ADD operation test
+        $display("--> Test 1: ADD operation");
+        test_num = 1;
+        alu_control = 4'b0000; //ADD
+        for(int i = 0; i < 1000; i++) begin
+            operand1 = $urandom();
+            operand2 = $urandom();
+            expected = operand1 + operand2;
+            #1;
+            assert (alu_result === expected) else $error("Test Failed: ADD operation incorrect for operands %0d and %0d. Expected %0d, got %0d", operand1, operand2, expected, alu_result);
+        end
+        $display("Test 1 done.");
+
+        //AND operation test
+        $display("--> Test 2: AND operation");
+        test_num = 2;
+        alu_control = 4'b0010; //AND
+        for(int i = 0; i < 1000; i++) begin
+            operand1 = $urandom();
+            operand2 = $urandom();
+            expected = operand1 & operand2;
+            #1;
+            assert (alu_result === expected) else $error("Test Failed: AND operation incorrect for operands %0d and %0d. Expected %0d, got %0d", operand1, operand2, expected, alu_result);
+        end
+        $display("Test 2 done.");
+
+        //OR operation test
+        $display("--> Test 3: OR operation");
+        test_num = 3;
+        alu_control = 4'b0011; //OR
+        for(int i = 0; i < 1000; i++) begin
+            operand1 = $urandom();
+            operand2 = $urandom();
+            expected = operand1 | operand2;
+            #1;
+            assert (alu_result === expected) else $error("Test Failed: OR operation incorrect for operands %0d and %0d. Expected %0d, got %0d", operand1, operand2, expected, alu_result);
+        end
+        $display("Test 3 done.");
+
+        //SUB operation test
+        $display("--> Test 4: SUB operation");
+        test_num = 4;
+        alu_control = 4'b0001; //SUB
+        for(int i = 0; i < 1000; i++) begin
+            operand1 = $urandom();
+            operand2 = $urandom();
+            expected = operand1 + (~operand2 + 1'b1);
+            #1
+            assert (alu_result === expected) else $error("Test Failed: SUB operation incorrect for operands %0d and %0d. Expected %0d, got %0d", operand1, operand2, expected, alu_result);
+        end
+        $display("Test 4 done.");
+
+        //SLT operation test
+        $display("--> Test 5: SLT operation");
+        test_num = 5;
+        alu_control = 4'b0101; //SLT
+        for(int i = 0; i < 1000; i++) begin
+            operand1 = $urandom();
+            operand2 = $urandom();
+            expected = ($signed(operand1) < $signed(operand2)) ? 32'b1 : 32'b0;
+            #1;
+            assert (alu_result === expected) else $error("Test Failed: SLT operation incorrect for operands %0d and %0d. Expected %0d, got %0d", $signed(operand1), $signed(operand2), expected, alu_result);
+        end
+        $display("Test 5 done.");
+
+        //SLTU operation test
+        $display("--> Test 6: SLTU operation");
+        test_num = 6;
+        alu_control = 4'b0111; //SLTU
+        for(int i = 0; i < 1000; i++) begin
+            operand1 = $urandom();
+            operand2 = $urandom();
+            expected = (operand1 < operand2) ? 32'b1 : 32'b0;
+            #1;
+            assert (alu_result === expected) else $error("Test Failed: SLTU operation incorrect for operands %0d and %0d. Expected %0d, got %0d", operand1, operand2, expected, alu_result);
+        end
+        $display("Test 6 done.");
+
+        //XOR operation test
+        $display("--> Test 7: XOR operation");
+        test_num = 7;
+        alu_control = 4'b1000; //XOR
+        for(int i = 0; i < 1000; i++) begin
+            operand1 = $urandom();
+            operand2 = $urandom();
+            expected = operand1 ^ operand2;
+            #1;
+            assert (alu_result === expected) else $error("Test Failed: XOR operation incorrect for operands %0d and %0d. Expected %0d, got %0d", operand1, operand2, expected, alu_result);
+        end
+        $display("Test 7 done.");
+
+        //SLL operation test
+        $display("--> Test 8: SLL operation");
+        test_num = 8;
+        alu_control = 4'b0100; //SLL
+        for(int i = 0; i < 1000; i++) begin
+            operand1 = $urandom();
+            operand2 = $urandom();
+            expected = operand1 << operand2[4:0];
+            #1;
+            assert (alu_result === expected) else $error("Test Failed: SLL operation incorrect for operands %0d and %0d. Expected %0d, got %0d", operand1, operand2[4:0], expected, alu_result);
+        end
+        $display("Test 8 done.");
+
+
+        //SRL operation test
+        $display("--> Test 9: SRL operation");
+        test_num = 9;
+        alu_control = 4'b0110; //SRL
+        for(int i = 0; i < 1000; i++) begin
+            operand1 = $urandom();
+            operand2 = $urandom();
+            expected = operand1 >> operand2[4:0];
+            #1;
+            assert (alu_result === expected) else $error("Test Failed: SRL operation incorrect for operands %0d and %0d. Expected %0d, got %0d", operand1, operand2[4:0], expected, alu_result);
+        end
+        $display("Test 9 done.");
+
+
+        //SRA operation test
+        $display("--> Test 10: SRA operation");
+        test_num = 10;
+        alu_control = 4'b1001; //SRA
+        for(int i = 0; i < 1000; i++) begin
+            operand1 = $urandom();
+            operand2 = $urandom();
+            expected = $signed(operand1) >>> operand2[4:0];
+            #1;
+            assert (alu_result === expected) else $error("Test Failed: SRA operation incorrect for operands %0d and %0d. Expected %0d, got %0d", $signed(operand1), operand2[4:0], expected, alu_result);
+        end
+        $display("Test 10 done.");
+
+
+        //last bit test
+        $display("--> Test 11: Last Bit test");
+        test_num = 11;
+        alu_control = 4'b0101; //SLT
+        for(int i = 0; i < 1000; i++) begin
+            operand1 = $urandom();
+            operand2 = $urandom();
+            expected = ($signed(operand1) < $signed(operand2)) ? 32'b1 : 32'b0;
+            #1;
+            assert (last_bit === expected) else $error("Test Failed: last_bit incorrect for operands %0d and %0d. Expected %0d, got %0d", $signed(operand1), $signed(operand2), expected, alu_result);
+        end
+        $display("Test 11 done.");
+
+        
+
+        test_num = 0;
+        //end of tests
+        $display("All tests completed.");
+        $finish;
+    end
+endmodule

@@ -1,7 +1,7 @@
-/RISC-V-CPU.cache
-/RISC-V-CPU.hw
-/RISC-V-CPU.ip_user_files
-/RISC-V-CPU.sim
+*.cache*/
+*.hw*/
+*.ip_user_files*/
+*.sim*/
 *.jou
 *.str
 *.log

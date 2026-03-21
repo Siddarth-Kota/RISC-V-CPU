@@ -1,0 +1,478 @@
+`timescale 1ns / 1ps
+
+module cpu_tb;
+
+    logic clk;
+    logic rst_n;
+
+    //debug
+    logic [5:0] test_num = 0;
+
+    cpu dut (
+        .clk(clk),
+        .rst_n(rst_n)
+    );
+
+    initial begin
+        clk = 0;
+        forever #0.5 clk = ~clk;
+    end
+
+    logic [31:0] expected_instr_mem [0:255];
+    logic [31:0] expected;
+
+    task cpu_reset();
+        begin
+            rst_n = 0;
+            @(negedge clk);
+            rst_n = 1;
+            @(posedge clk);
+        end
+    endtask
+
+    initial begin
+        // int check_limit = 5;
+
+        $readmemh("instr_mem_test.hex", expected_instr_mem);
+
+        $display("Starting CPU TestBench");
+        test_num = 0;
+        // $display("testing the CPU Initializing");
+
+        // cpu_reset();
+        // assert (dut.pc == 32'h00000000) else $error("PC Init Failed. Expected 0, got %h", dut.pc);
+        
+        // for(int i = 0; i < check_limit; i++) begin
+        //     if(expected_instr_mem[i] == 32'bx) begin
+        //         $display("Reached end of hex file at index %0d", i);
+        //         break;
+        //     end
+        //     //test DUT instruction vs expected memory
+        //     assert(dut.Instruction == expected_instr_mem[i]) else $error("Instruction Wrong at index %0d. Expected %h, got %h", i, expected_instr_mem[i], dut.Instruction);
+        //     @(posedge clk);
+        // end
+        // $display("CPU initialization test complete");
+
+        $display("Running CPU instruction tests");
+        cpu_reset();
+
+        $display("\n--> Test 1: I-type LW Instruction");
+        test_num = 1;
+        #0.1;
+        assert (dut.registers.reg_array[18] == 32'hAFAFAFAF) else $error("LW Test Failed. Register x18: Expected AFAFAFAF, got %h", dut.registers.reg_array[18]);
+        $display("I-type LW Instruction Test done");
+
+
+        $display("\n--> Test 2: S-type SW Instruction");
+        test_num = 2;
+        assert (dut.data_memory.mem_array[3] == 32'hF2F2F2F2) else $error("SW Initial Value Test Failed. Memory[3]: Expected F2F2F2F2, got %h", dut.data_memory.mem_array[3]);
+        @(posedge clk); #0.1;
+        assert (dut.data_memory.mem_array[3] == 32'hAFAFAFAF) else $error("SW Final Value Test Failed. Memory[3]: Expected AFAFAFAF, got %h", dut.data_memory.mem_array[3]);
+        $display("S-type SW Instruction Test done");
+
+
+        $display("\n--> Test 3: R-type ADD Instruction");
+        test_num = 3;
+        expected = 32'hAFAFAFAF + 32'h12341234;
+        @(posedge clk); #0.1;
+        assert (dut.registers.reg_array[19] == 32'h12341234) else $error("R-type ADD Test Failed. Register x19: Expected 12341234, got %h", dut.registers.reg_array[19]);
+        @(posedge clk); #0.1;
+        assert (dut.registers.reg_array[20] == expected) else $error("R-type ADD Test Failed. Register x20: Expected %h, got %h", expected, dut.registers.reg_array[20]);
+        $display("R-type ADD Instruction Test done");
+
+
+        $display("\n--> Test 4: R-type AND Instruction");
+        test_num = 4;
+        expected = expected & 32'hAFAFAFAF;
+        @(posedge clk); #0.1;
+        assert (dut.registers.reg_array[21] == expected) else $error("R-type AND Test Failed. Register x21: Expected %h, got %h", expected, dut.registers.reg_array[21]);
+        $display("R-type AND Instruction Test done");
+
+
+        $display("\n--> Test 5: R-type OR Instruction");
+        test_num = 5;
+        expected = 32'h56785678 | 32'hBCBCBCBC;
+        @(posedge clk); #0.1;
+        assert (dut.registers.reg_array[5] == 32'h56785678) else $error("R-type OR Test Failed. Register x5: Expected 56785678, got %h", dut.registers.reg_array[5]);
+        @(posedge clk); #0.1;
+        assert (dut.registers.reg_array[6] == 32'hBCBCBCBC) else $error("R-type OR Test Failed. Register x6: Expected BCBCBCBC, got %h", dut.registers.reg_array[6]);
+        @(posedge clk); #0.1;
+        assert (dut.registers.reg_array[7] == expected) else $error("R-type OR Test Failed. Register x7: Expected %h, got %h", expected, dut.registers.reg_array[7]);
+        $display("R-type OR Instruction Test done");
+
+
+        $display("\n--> Test 6: B-type BEQ Instruction");
+        test_num = 6;
+        assert (dut.Instruction == 32'h00730663) else $error("BEQ Instruction Test Failed. Expected 00730663, got %h", dut.Instruction);
+        
+        @(posedge clk); #0.1; //Branch not taken
+        assert (dut.Instruction == 32'h00802B03) else $error("BEQ Instruction Test Failed. Expected 00802B03, got %h", dut.Instruction);
+        
+        @(posedge clk); #0.1; //set Register x22
+        assert (dut.registers.reg_array[22] == 32'hAFAFAFAF) else $error("BEQ Test Failed. Register x22: Expected AFAFAFAF, got %h", dut.registers.reg_array[22]);
+        
+        @(posedge clk); #0.1; //Branch taken
+        assert (dut.Instruction == 32'h00002B03) else $error("BEQ Instruction Test Failed. Expected 00002B03, got %h", dut.Instruction);
+        
+        @(posedge clk); #0.1; //set Register x22 to new value
+        assert (dut.registers.reg_array[22] == 32'hABABABAB) else $error("BEQ Test Failed. Register x22: Expected ABABABAB, got %h", dut.registers.reg_array[22]);
+        
+        @(posedge clk); #0.1; //Branch taken
+        assert (dut.Instruction == 32'h00000663) else $error("BEQ Instruction Test Failed. Expected 00000663, got %h", dut.Instruction);
+        
+        @(posedge clk); #0.1; //Branch taken
+        assert (dut.Instruction == 32'h00000013) else $error("BEQ Instruction Test Failed. Expected 00000013, got %h", dut.Instruction);
+        $display("B-type BEQ Instruction Test done");
+
+
+        $display("\n--> Test 7: J-type JAL Instruction");
+        test_num = 7;
+
+        @(posedge clk); #0.1;
+        assert (dut.Instruction == 32'h00C000EF) else $error("JAL Instruction Test Failed. Expected 00C000EF, got %h", dut.Instruction);
+        assert (dut.pc == 32'h00000044) else $error("JAL Instruction Test Failed. PC Expected 00000044, got %h", dut.pc);
+        
+        @(posedge clk); #0.1; //jal x1 0xC
+        assert (dut.Instruction == 32'hFFDFF0EF) else $error("JAL Instruction Test Failed. Expected FFDFF0EF, got %h", dut.Instruction);
+        assert (dut.pc == 32'h00000050) else $error("JAL Instruction Test Failed. PC Expected 00000050, got %h", dut.pc);
+        assert (dut.registers.reg_array[1] == 32'h00000048) else $error("JAL Instruction Test Failed. Register x1 Expected 00000048, got %h", dut.registers.reg_array[1]);
+
+        @(posedge clk); #0.1; //jal x1 -0x4
+        assert (dut.Instruction == 32'h00C000EF) else $error("JAL Instruction Test Failed. Expected 00C000EF, got %h", dut.Instruction);
+        assert (dut.pc == 32'h0000004C) else $error("JAL Instruction Test Failed. PC Expected 0000004C, got %h", dut.pc);
+        assert (dut.registers.reg_array[1] == 32'h00000054) else $error("JAL Instruction Test Failed. Register x1 Expected 00000054, got %h", dut.registers.reg_array[1]);
+
+        @(posedge clk); #0.1; //jal x1 0xC
+        assert (dut.Instruction == 32'h00C02383) else $error("JAL Instruction Test Failed. Expected 00C02383, got %h", dut.Instruction);
+        assert (dut.pc == 32'h00000058) else $error("JAL Instruction Test Failed. PC Expected 00000058, got %h", dut.pc);
+        assert (dut.registers.reg_array[1] == 32'h00000050) else $error("JAL Instruction Test Failed. Register x1 Expected 00000050, got %h", dut.registers.reg_array[1]);
+
+        @(posedge clk); #0.1; //lw x7 0xC(x0)
+        assert (dut.registers.reg_array[7] == 32'hAFAFAFAF) else $error("JAL Instruction Test Failed. Register x7 Expected AFAFAFAF, got %h", dut.registers.reg_array[7]);
+        $display("J-type JAL Instruction Test done");
+
+
+        $display("\n--> Test 8: I-type ADDI Instruction");
+        test_num = 8;
+        assert(dut.Instruction == 32'h1AB38D13) else $error("ADDI Instruction Test Failed. Expected 1AB38D13, got %h", dut.Instruction);
+        assert(dut.registers.reg_array[26] != 32'hAFAFB15A) else $error("ADDI Instruction Test Failed. Register x26 should not be AFAFB15A, got %h", dut.registers.reg_array[26]);
+        @(posedge clk); #0.1; //addi x26 x7 0x1AB (positive immediate)
+        assert(dut.Instruction == 32'hF2130C93) else $error("ADDI Instruction Test Failed. Expected F2130C93, got %h", dut.Instruction);
+        assert(dut.registers.reg_array[26] == 32'hAFAFB15A) else $error("ADDI Instruction Test Failed. Register x26: Expected AFAFB15A, got %h", dut.registers.reg_array[26]);
+        @(posedge clk); #0.1; //addi x25 x6 0xF21 (negative immediate)
+        assert(dut.registers.reg_array[25] == 32'hBCBCBBDD) else $error("ADDI Instruction Test Failed. Register x25: Expected BCBCBBDD, got %h", dut.registers.reg_array[25]);
+        $display("I-type ADDI Instruction Test done");
+
+
+        $display("\n--> Test 9: U-type AUIPC Instruction");
+        test_num = 9;
+        assert(dut.Instruction == 32'h1F1FA297) else $error("AUIPC Instruction Test Failed. Expected 1F1FA297, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //auipc x5 0x1F1FA
+        assert(dut.registers.reg_array[5] == 32'h1F1FA064) else $error("AUIPC Instruction Test Failed. Register x5: Expected 1F1FA064, got %h", dut.registers.reg_array[5]);
+        assert(dut.pc == 32'h00000068) else $error("AUIPC Instruction Test Failed. PC Expected 00000068, got %h", dut.pc);
+        $display("U-type AUIPC Instruction Test done");
+
+
+        $display("\n--> Test 10: U-type LUI Instruction");
+        test_num = 10;
+        assert(dut.Instruction == 32'h2F2FA2B7) else $error("LUI Instruction Test Failed. Expected 2F2FA2B7, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //lui x5 0x2F2FA
+        assert(dut.registers.reg_array[5] == 32'h2F2FA000) else $error("LUI Instruction Test Failed. Register x5: Expected 2F2FA000, got %h", dut.registers.reg_array[5]);
+        $display("U-type LUI Instruction Test done");
+
+
+        $display("\n--> Test 11: I-type SLTI Instruction");
+        test_num = 11;
+        assert(dut.registers.reg_array[19] == 32'h12341234) else $error("SLTI Instruction Test Failed. Register x19: Expected 12341234, got %h", dut.registers.reg_array[19]);
+        assert(dut.Instruction == 32'hFFF9AB93) else $error("SLTI Instruction Test Failed. Expected FFF9AB93, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //slti x23 x19 0xFFF (negative immediate)
+        assert(dut.registers.reg_array[23] == 32'h00000000) else $error("SLTI Instruction Test Failed. Register x23: Expected 0, got %h", dut.registers.reg_array[23]);
+        @(posedge clk); #0.1; //slti x23 x23 0x001 (positive immediate)
+        assert(dut.registers.reg_array[23] == 32'h00000001) else $error("SLTI Instruction Test Failed. Register x23: Expected 1, got %h", dut.registers.reg_array[23]);
+        $display("I-type SLTI Instruction Test done");
+
+        
+        $display("\n--> Test 12: I-type SLTU Instruction");
+        test_num = 12;
+        assert(dut.Instruction == 32'hFFF9BB13) else $error("SLTU Instruction Test Failed. Expected FFF9BB13, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //sltu x22 x19 0xFFF
+        assert(dut.registers.reg_array[22] == 32'h00000001) else $error("SLTU Instruction Test Failed. Register x22: Expected 1, got %h", dut.registers.reg_array[22]);
+        @(posedge clk); #0.1; //sltu x22 x19 0x001
+        assert(dut.registers.reg_array[22] == 32'h00000000) else $error("SLTU Instruction Test Failed. Register x22: Expected 0, got %h", dut.registers.reg_array[22]);
+        $display("I-type SLTU Instruction Test done");
+
+        
+        $display("\n--> Test 13: I-type XORI Instruction");
+        test_num = 13;
+        assert(dut.Instruction == 32'hAAA9C913) else $error("XORI Instruction Test Failed. Expected AAA9C913, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //xori x18 x19 0xAAA
+        assert(dut.registers.reg_array[18] == 32'hEDCBE89E) else $error("XORI Instruction Test Failed. Register x18: Expected EDCBE89E, got %h", dut.registers.reg_array[18]);
+        @(posedge clk); #0.1; //xori x19 x18 0x000
+        assert(dut.registers.reg_array[19] == 32'hEDCBE89E) else $error("XORI Instruction Test Failed. Register x19: Expected EDCBE89E, got %h", dut.registers.reg_array[19]);
+        $display("I-type XORI Instruction Test done");
+
+
+        $display("\n--> Test 14: I-type ORI Instruction");
+        test_num = 14;
+        assert(dut.Instruction == 32'h48F9E813) else $error("ORI Instruction Test Failed. Expected 48F9E813, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //ori x16 x19 0x48F
+        assert(dut.registers.reg_array[16] == 32'hEDCBEC9F) else $error("ORI Instruction Test Failed. Register x16: Expected EDCBEC9F, got %h", dut.registers.reg_array[16]);
+        @(posedge clk); #0.1; //ori x17 x19 0xF0F
+        assert(dut.registers.reg_array[17] == 32'hFFFFFF9F) else $error("ORI Instruction Test Failed. Register x17: Expected FFFFFF9F, got %h", dut.registers.reg_array[17]);
+        $display("I-type ORI Instruction Test done");
+
+
+        $display("\n--> Test 15: I-type ANDI Instruction");
+        test_num = 15;
+        assert(dut.Instruction == 32'h07F9FE13) else $error("ANDI Instruction Test Failed. Expected 07F9FE13, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //andi x28 x19 0x07F
+        assert(dut.registers.reg_array[28] == 32'h0000001E) else $error("ANDI Instruction Test Failed. Register x28: Expected 0000001E, got %h", dut.registers.reg_array[28]);
+        @(posedge clk); #0.1; //andi x29 x19 0x800
+        assert(dut.registers.reg_array[29] == 32'hEDCBE800) else $error("ANDI Instruction Test Failed. Register x29: Expected EDCBE800, got %h", dut.registers.reg_array[29]);
+        @(posedge clk); #0.1; //andi x20 x21 0x000
+        assert(dut.registers.reg_array[20] == 32'h00000000) else $error("ANDI Instruction Test Failed. Register x20: Expected 00000000, got %h", dut.registers.reg_array[20]);
+        $display("I-type ANDI Instruction Test done");
+
+
+        $display("\n--> Test 16: I-type SLLI Instruction");
+        test_num = 16;
+        assert (dut.Instruction == 32'h00499993) else $error("SLLI Instruction Test Failed. Expected 00499993, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //slli x19 x19 0x4
+        assert (dut.registers.reg_array[19] == 32'hDCBE89E0) else $error("SLLI Instruction Test Failed. Register x19: Expected DCBE89E0, got %h", dut.registers.reg_array[19]);
+        assert (dut.reg_write == 1'b0) else $error("SLLI Instruction Test Failed. reg_write should be 0 for invalid SLLI, got %b", dut.reg_write);
+        @(posedge clk); #0.1; //slli invalid F7
+        assert (dut.registers.reg_array[19] == 32'hDCBE89E0) else $error("SLLI Instruction Test Failed. Register x19: Expected DCBE89E0, got %h", dut.registers.reg_array[19]);
+        $display("I-type SLLI Instruction Test done");
+
+
+        $display("\n--> Test 17: I-type SRLI Instruction");
+        test_num = 17;
+        assert (dut.Instruction == 32'h0048DA13) else $error("SRLI Instruction Test Failed. Expected 0048DA13, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //srli x20 x17 0x4
+        assert (dut.registers.reg_array[20] == 32'h0FFFFFF9) else $error("SRLI Instruction Test Failed. Register x20: Expected 0FFFFFF9, got %h", dut.registers.reg_array[20]);
+        assert (dut.reg_write == 1'b0) else $error("SRLI Instruction Test Failed. reg_write should be 0 for invalid SRLI, got %b", dut.reg_write);
+        @(posedge clk); #0.1; //srli invalid F7
+        assert (dut.registers.reg_array[20] == 32'h0FFFFFF9) else $error("SRLI Instruction Test Failed. Register x20: Expected 0FFFFFF9, got %h", dut.registers.reg_array[20]);
+        $display("I-type SRLI Instruction Test done");
+
+
+        $display("\n--> Test 18: I-type SRAI Instruction");
+        test_num = 18;
+        assert (dut.Instruction == 32'h4048DA93) else $error("SRAI Instruction Test Failed. Expected 4048DA93, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //srai x21 x17 0x4
+        assert (dut.registers.reg_array[21] == 32'hFFFFFFF9) else $error("SRAI Instruction Test Failed. Register x21: Expected FFFFFFF9, got %h", dut.registers.reg_array[21]);
+        assert (dut.reg_write == 1'b0) else $error("SRAI Instruction Test Failed. reg_write should be 0 for invalid SRAI, got %b", dut.reg_write);
+        @(posedge clk); #0.1; //srai invalid F7
+        assert (dut.registers.reg_array[21] == 32'hFFFFFFF9) else $error("SRAI Instruction Test Failed. Register x21: Expected FFFFFFF9, got %h", dut.registers.reg_array[21]);
+        $display("I-type SRAI Instruction Test done");
+
+
+        $display("\n--> Test 19: R-type SUB Instruction");
+        test_num = 19;
+        assert (dut.Instruction == 32'h419A8BB3) else $error("SUB Instruction Test Failed. Expected 419A8BB3, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //sub x23, x21, x25
+        assert (dut.registers.reg_array[23] == 32'h4343441C) else $error("SUB Instruction Test Failed. Register x23: Expected 4343441C, got %h", dut.registers.reg_array[23]);
+        $display("R-type SUB Instruction Test done");
+
+
+        $display("\n--> Test 20: R-type XOR Instruction");
+        test_num = 20;
+        assert (dut.Instruction == 32'h013BCAB3) else $error("XOR Instruction Test Failed. Expected 013BCAB3, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //xor x21, x23, x19
+        assert (dut.registers.reg_array[21] == 32'h9FFDCDFC) else $error("XOR Instruction Test Failed. Register x21: Expected 9FFDCDFC, got %h", dut.registers.reg_array[21]);
+        $display("R-type XOR Instruction Test done");
+
+
+        $display("\n--> Test 21: R-type SLL Instruction");
+        test_num = 21;
+        @(posedge clk); #0.1; //addi x5 x0 0x8
+        assert(dut.registers.reg_array[5] == 32'h00000008) else $error("ADDI Instruction Test Failed. Register x5: Expected 00000008, got %h", dut.registers.reg_array[5]);
+        assert(dut.Instruction == 32'h005A9AB3) else $error("SLL Instruction Test Failed. Expected 005A9AB3, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //sll x21 x21 x5
+        assert(dut.registers.reg_array[21] == 32'hFDCDFC00) else $error("SLL Instruction Test Failed. Register x21: Expected FDCDFC00, got %h", dut.registers.reg_array[21]);
+        $display("R-type SLL Instruction Test done");
+
+        
+        $display("\n--> Test 22: R-type SLT Instruction");
+        test_num = 22;
+        assert (dut.Instruction == 32'h015BA333) else $error("SLT Instruction Test Failed. Expected 015BA333, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //slt x6 x23 x21
+        assert (dut.registers.reg_array[6] == 32'h00000000) else $error("SLT Instruction Test Failed. Register x6: Expected 0, got %h", dut.registers.reg_array[6]);
+        $display("R-type SLT Instruction Test done");
+
+
+        $display("\n--> Test 23: R-type SLTU Instruction");
+        test_num = 23;
+        assert (dut.Instruction == 32'h015BB333) else $error("SLTU Instruction Test Failed. Expected 015BB333, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //sltu x6 x23 x21
+        assert (dut.registers.reg_array[6] == 32'h00000001) else $error("SLTU Instruction Test Failed. Register x6: Expected 1, got %h", dut.registers.reg_array[6]);
+        $display("R-type SLTU Instruction Test done");
+
+
+        $display("\n--> Test 24: R-type SRL Instruction");
+        test_num = 24;
+        assert (dut.Instruction == 32'h005AD433) else $error("SRL Instruction Test Failed. Expected 005AD433, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //srl x8 x21 x5
+        assert (dut.registers.reg_array[8] == 32'h00FDCDFC) else $error("SRL Instruction Test Failed. Register x8: Expected 00FDCDFC, got %h", dut.registers.reg_array[8]);
+        $display("R-type SRL Instruction Test done");
+
+
+        $display("\n--> Test 25: R-type SRA Instruction");
+        test_num = 25;
+        assert (dut.Instruction == 32'h405AD4B3) else $error("SRA Instruction Test Failed. Expected 405AD4B3, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //sra x9 x21 x5
+        assert (dut.registers.reg_array[9] == 32'hFFFDCDFC) else $error("SRA Instruction Test Failed. Register x9: Expected FFFDCDFC, got %h", dut.registers.reg_array[9]);
+        $display("R-type SRA Instruction Test done");
+
+
+        $display("\n--> Test 26: B-type BLT Instruction");
+        test_num = 26;
+        assert (dut.Instruction == 32'h0092C463) else $error("BLT Instruction Test Failed. Expected 0092C463, got %h", dut.Instruction);
+        assert (dut.registers.reg_array[5] == 32'h00000008) else $error("BLT Instruction Test Failed. Register x5: Expected 00000008, got %h", dut.registers.reg_array[5]);
+        assert (dut.registers.reg_array[9] == 32'hFFFDCDFC) else $error("BLT Instruction Test Failed. Register x9: Expected FFFDCDFC, got %h", dut.registers.reg_array[9]);
+        @(posedge clk); #0.1; //blt x5 x9 0x8
+        assert (dut.Instruction == 32'h0054C463) else $error("BLT Instruction Test Failed. Expected 0054C463, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //blt x9 x5 0x8
+        assert (dut.Instruction != 32'h00C00413) else $error("BLT Instruction Test Failed. Expected not 00C00413, got %h", dut.Instruction);
+        assert (dut.registers.reg_array[8] == 32'h00FDCDFC) else $error("BLT Instruction Test Failed. Register x8: Expected 00FDCDFC, got %h", dut.registers.reg_array[8]);
+        $display("B-type BLT Instruction Test done");
+
+
+        $display("\n--> Test 27: B-type BNE Instruction");
+        test_num = 27;
+        assert (dut.Instruction == 32'h00949463) else $error("BNE Instruction Test Failed. Expected 00949463, got %h", dut.Instruction);
+        assert (dut.registers.reg_array[5] == 32'h00000008) else $error("BNE Instruction Test Failed. Register x5: Expected 00000008, got %h", dut.registers.reg_array[5]);
+        assert (dut.registers.reg_array[9] == 32'hFFFDCDFC) else $error("BNE Instruction Test Failed. Register x9: Expected FFFDCDFC, got %h", dut.registers.reg_array[9]);
+        @(posedge clk); #0.1; //bne x9 x9 0x8
+        assert (dut.Instruction == 32'h00549463) else $error("BNE Instruction Test Failed. Expected 00549463, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //bne x9 x5 0x8
+        assert (dut.Instruction != 32'h00C00413) else $error("BNE Instruction Test Failed. Expected not 00C00413, got %h", dut.Instruction);
+        assert (dut.registers.reg_array[8] == 32'h00FDCDFC) else $error("BNE Instruction Test Failed. Register x8: Expected 00FDCDFC, got %h", dut.registers.reg_array[8]);
+        $display("B-type BNE Instruction Test done");
+
+
+        $display("\n--> Test 28: B-type BGE Instruction");
+        test_num = 28;
+        assert (dut.Instruction == 32'h0054D463) else $error("BGE Instruction Test Failed. Expected 0054D463, got %h", dut.Instruction);
+        assert (dut.registers.reg_array[5] == 32'h00000008) else $error("BGE Instruction Test Failed. Register x5: Expected 00000008, got %h", dut.registers.reg_array[5]);
+        assert (dut.registers.reg_array[9] == 32'hFFFDCDFC) else $error("BGE Instruction Test Failed. Register x9: Expected FFFDCDFC, got %h", dut.registers.reg_array[9]);
+        @(posedge clk); #0.1; //bge x9 x5 0x8
+        assert (dut.Instruction == 32'h0094D463) else $error("BGE Instruction Test Failed. Expected 0094D463, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //bge x9 x9 0x8
+        assert (dut.Instruction != 32'h00C00413) else $error("BGE Instruction Test Failed. Expected not 00C00413, got %h", dut.Instruction);
+        assert (dut.registers.reg_array[8] == 32'h00FDCDFC) else $error("BGE Instruction Test Failed. Register x8: Expected 00FDCDFC, got %h", dut.registers.reg_array[8]);
+        $display("B-type BGE Instruction Test done");
+
+
+        $display("\n--> Test 29: B-type BLTU Instruction");
+        test_num = 29;
+        assert (dut.Instruction == 32'h0054E463) else $error("BLTU Instruction Test Failed. Expected 0054E463, got %h", dut.Instruction);
+        assert (dut.registers.reg_array[5] == 32'h00000008) else $error("BLTU Instruction Test Failed. Register x5: Expected 00000008, got %h", dut.registers.reg_array[5]);
+        assert (dut.registers.reg_array[9] == 32'hFFFDCDFC) else $error("BLTU Instruction Test Failed. Register x9: Expected FFFDCDFC, got %h", dut.registers.reg_array[9]);
+        @(posedge clk); #0.1; //bltu x9 x5 0x8
+        assert (dut.Instruction == 32'h0092E463) else $error("BLTU Instruction Test Failed. Expected 0092E463, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //bltu x5 x9 0x8
+        assert (dut.Instruction != 32'h00C00413) else $error("BLTU Instruction Test Failed. Expected not 00C00413, got %h", dut.Instruction);
+        assert (dut.registers.reg_array[8] == 32'h00FDCDFC) else $error("BLTU Instruction Test Failed. Register x8: Expected 00FDCDFC, got %h", dut.registers.reg_array[8]);
+        $display("B-type BLTU Instruction Test done");
+
+
+        $display("\n--> Test 30: B-type BGEU Instruction");
+        test_num = 30;
+        assert (dut.Instruction == 32'h0092F463) else $error("BGEU Instruction Test Failed. Expected 0092F463, got %h", dut.Instruction);
+        assert (dut.registers.reg_array[5] == 32'h00000008) else $error("BGEU Instruction Test Failed. Register x5: Expected 00000008, got %h", dut.registers.reg_array[5]);
+        assert (dut.registers.reg_array[9] == 32'hFFFDCDFC) else $error("BGEU Instruction Test Failed. Register x9: Expected FFFDCDFC, got %h", dut.registers.reg_array[9]);
+        @(posedge clk); #0.1; //bgeu x5 x9 0x8
+        assert (dut.Instruction == 32'h0054F463) else $error("BGEU Instruction Test Failed. Expected 0054F463, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //bgeu x9 x5 0x8
+        assert (dut.Instruction != 32'h00C00413) else $error("BGEU Instruction Test Failed. Expected not 00C00413, got %h", dut.Instruction);
+        assert (dut.registers.reg_array[8] == 32'h00FDCDFC) else $error("BGEU Instruction Test Failed. Register x8: Expected 00FDCDFC, got %h", dut.registers.reg_array[8]);
+        $display("B-type BGEU Instruction Test done");
+
+
+        $display("\n--> Test 31: I-type JALR Instruction");
+        test_num = 31;
+        assert(dut.Instruction == 32'h00000397) else $error("JALR Instruction Test Failed. Expected 00000397, got %h", dut.Instruction);
+        assert(dut.pc == 32'h0000010C) else $error("JALR Instruction Test Failed. PC: Expected 0000010C, got %h", dut.pc);
+        @(posedge clk); #0.1; //jalr x7 x0 0x0
+        @(posedge clk); #0.1; //addi x7 x7 0x14
+        assert(dut.registers.reg_array[7] == 32'h00000120) else $error("JALR Instruction Test Failed. Register x7: Expected 00000120, got %h", dut.registers.reg_array[7]);
+        @(posedge clk); #0.1; //jalr x1 -4(x7)
+        assert(dut.registers.reg_array[1] == 32'h00000118) else $error("JALR Instruction Test Failed. Register x1: Expected 00000118, got %h", dut.registers.reg_array[1]);
+        assert(dut.Instruction != 32'h00C00413) else $error("JALR Instruction Test Failed. Expected not 00C00413, got %h", dut.Instruction);
+        assert(dut.registers.reg_array[8] == 32'h00FDCDFC) else $error("JALR Instruction Test Failed. Register x8: Expected 00FDCDFC, got %h", dut.registers.reg_array[8]);
+        assert(dut.pc == 32'h0000011C) else $error("JALR Instruction Test Failed. PC: Expected 0000011C, got %h", dut.pc);
+        $display("I-type JALR Instruction Test done");
+
+
+        $display("\n--> Test 32: S-type SB Instruction");
+        test_num = 32;
+        assert (dut.Instruction == 32'h008020A3) else $error("SB Instruction Test Failed. Expected 008020A3, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //sw x8 0x1(x0)
+        assert (dut.data_memory.mem_array[1] == 32'h00000000) else $error("SB Instruction Test Failed. Memory[1]: Expected 00000000, got %h", dut.data_memory.mem_array[1]);
+        @(posedge clk); #0.1; //sb x8 0x6(x0)
+        assert (dut.data_memory.mem_array[1] == 32'h00FC0000) else $error("SB Instruction Test Failed. Memory[1]: Expected 00FC0000, got %h", dut.data_memory.mem_array[1]);
+        $display("S-type SB Instruction Test done");
+
+
+        $display("\n--> Test 33: S-type SH Instruction");
+        test_num = 33;
+        assert (dut.Instruction == 32'h008010A3) else $error("SH Instruction Test Failed. Expected 008010A3, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //sh x8 0x1(x0)
+        assert (dut.data_memory.mem_array[1] == 32'h00FC0000) else $error("SH Instruction Test Failed. Memory[1]: Expected 00FC0000, got %h", dut.data_memory.mem_array[1]);
+        @(posedge clk); #0.1; //sh x8 0x3(x0)
+        assert (dut.data_memory.mem_array[1] == 32'h00FC0000) else $error("SH Instruction Test Failed. Memory[1]: Expected 00FC0000, got %h", dut.data_memory.mem_array[1]);
+        @(posedge clk); #0.1; //sh x8 0x6(x0)
+        assert (dut.data_memory.mem_array[1] == 32'hCDFC0000) else $error("SH Instruction Test Failed. Memory[1]: Expected CDFC0000, got %h", dut.data_memory.mem_array[1]);
+        $display("S-type SH Instruction Test done");
+
+
+        $display("\n--> Test 34: I-type LB Instruction");
+        test_num = 34;
+        assert(dut.Instruction == 32'h01000393) else $error("LB Setup Failed. Expected 01000393, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //addi x7 x0 0x10
+        assert(dut.registers.reg_array[7] == 32'h00000010) else $error("LB Setup Failed. Register x7: Expected 00000010, got %h", dut.registers.reg_array[7]);
+        assert(dut.Instruction == 32'hFFF3A903) else $error("LB Instruction Test Failed. Expected FFF3A903, got %h", dut.Instruction);
+        assert(dut.registers.reg_array[18] == 32'hEDCBE89E) else $error("LB Misaligned LW Failed. Register x18: Expected EDCBE89E, got %h", dut.registers.reg_array[18]);
+        @(posedge clk); #0.1; //lw x18 -1(x7)
+        assert(dut.Instruction == 32'hFFF38903) else $error("LB Instruction Test Failed. Expected FFF38903, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //lb x18 -1(x7)
+        assert(dut.registers.reg_array[18] == 32'hFFFFFFAF) else $error("LB Instruction Test Failed. Register x18: Expected FFFFFFAF, got %h", dut.registers.reg_array[18]);
+        $display("I-type LB Instruction Test done");
+
+
+        $display("\n--> Test 35: I-type LBU Instruction");
+        test_num = 35;
+        assert(dut.Instruction == 32'hFFD3C983) else $error("LBU Instruction Test Failed. Expected FFD3C983, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //lbu x19 -3(x7)
+        assert(dut.registers.reg_array[19] == 32'h000000AF) else $error("LBU Instruction Test Failed. Register x19: Expected 000000AF, got %h", dut.registers.reg_array[19]);
+        $display("I-type LBU Instruction Test done");
+
+
+        $display("\n--> Test 36: I-type LH Instruction");
+        test_num = 36;
+        assert(dut.Instruction == 32'hFFD39A03) else $error("LH Instruction Test Failed. Expected FFD39A03, got %h", dut.Instruction);
+        assert(dut.registers.reg_array[20] == 32'h0FFFFFF9) else $error("LH Misaligned Failed. Register x20: Expected 0FFFFFF9, got %h", dut.registers.reg_array[20]);
+        @(posedge clk); #0.1; //lh x20 -3(x7)
+        assert(dut.Instruction == 32'hFFA39A03) else $error("LH Instruction Test Failed. Expected FFA39A03, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //lh x20 -6(x7)
+        assert(dut.registers.reg_array[20] == 32'hFFFFAFAF) else $error("LH Instruction Test Failed. Register x20: Expected FFFFAFAF, got %h", dut.registers.reg_array[20]);
+        $display("I-type LH Instruction Test done");
+
+
+        $display("\n--> Test 37: I-type LHU Instruction");
+        test_num = 37;
+        assert(dut.Instruction == 32'hFFD3DA83) else $error("LHU Instruction Test Failed. Expected FFD3DA83, got %h", dut.Instruction);
+        assert(dut.registers.reg_array[21] == 32'hFDCDFC00) else $error("LHU Misaligned Failed. Register x21: Expected FDCDFC00, got %h", dut.registers.reg_array[21]);
+        @(posedge clk); #0.1; //lhu x21 -3(x7)
+        assert(dut.Instruction == 32'hFFA3DA83) else $error("LHU Instruction Test Failed. Expected FFA3DA83, got %h", dut.Instruction);
+        @(posedge clk); #0.1; //lhu x21 -6(x7)
+        assert(dut.registers.reg_array[21] == 32'h0000AFAF) else $error("LHU Instruction Test Failed. Register x21: Expected 0000AFAF, got %h", dut.registers.reg_array[21]);
+        $display("I-type LHU Instruction Test done");
+
+
+        test_num = 0;
+        $display("\n--> CPU instruction tests complete\n");
+        $finish;
+    end
+endmodule
