@@ -27,13 +27,6 @@ Shifts        | SRAI        | Register (rs1) + Immediate | Register (rd)        
 ---------------------------------------------------------------------------------------------------------
 Jumps         | JALR        | PC + 4 (Return Address)    | Register (rd)         | Jump and Link Register
                             | Register (rs1) + Immediate | Program Counter (PC)  | (Actual Jump Target)
----------------------------------------------------------------------------------------------------------
-System        | ECALL       | System (User Request)      | Operating System      | Environment Call (Trap)
-System        | EBREAK      | System (Debugger)          | Operating System      | Environment Break
----------------------------------------------------------------------------------------------------------
-Mem Order     | FENCE       | Predecessor Memory Ops     | Successor Memory Ops  | Enforce memory ordering
-Mem Order     | FENCE.TSO   | Store Operations           | Load Operations       | Total Store Ordering enforcement
-Hint          | PAUSE       | N/A (Pipeline State)       | N/A (Pipeline Delay)  | Pause hint (for spin-loops)
 
 ——————————————————————————————————————————————————————————————
 ——————————————————————————— S-Type ———————————————————————————
