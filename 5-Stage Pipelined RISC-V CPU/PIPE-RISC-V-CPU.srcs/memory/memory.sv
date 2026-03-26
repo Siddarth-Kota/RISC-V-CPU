@@ -23,7 +23,7 @@ module memory #(
         end
     end
 
-    always @(posedge clk) begin
+    always_ff @(posedge clk) begin
         //reset memory
         if(rst_n == 1'b0 && mem_init == "") begin
             for(int i = 0; i < WORDS; i = i + 1) begin

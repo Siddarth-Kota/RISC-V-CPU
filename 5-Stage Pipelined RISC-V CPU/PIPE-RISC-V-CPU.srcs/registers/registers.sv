@@ -19,7 +19,7 @@ module registers (
     reg [31:0] reg_array [0:31]; //register array (5-bit addresses)
 
     //write
-    always @(posedge clk) begin
+    always_ff @(posedge clk) begin
         //reset registers
         if(rst_n == 1'b0) begin
             for(int i = 0; i < 32; i++) begin
