@@ -5,9 +5,7 @@ module ALU (
     input logic [31:0] operand1,
     input logic [31:0] operand2,
 
-    output logic [31:0] alu_result,
-    output logic zero,
-    output logic last_bit
+    output logic [31:0] alu_result
     );
 
     import signal_pkg::*;
@@ -27,7 +25,4 @@ module ALU (
             default: alu_result = 32'b0;
         endcase
     end
-
-    assign zero = (alu_result == 32'b0) ? 1'b1 : 1'b0; //set zero flag
-    assign last_bit = alu_result[0];
 endmodule

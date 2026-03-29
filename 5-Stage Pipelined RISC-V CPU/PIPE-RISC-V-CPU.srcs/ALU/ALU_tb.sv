@@ -6,8 +6,6 @@ module ALU_tb;
     logic [31:0] operand1;
     logic [31:0] operand2;
     logic [31:0] alu_result;
-    logic zero;
-    logic last_bit;
 
 
     //debug
@@ -19,9 +17,7 @@ module ALU_tb;
         .operand1(operand1),
         .operand2(operand2),
         
-        .alu_result(alu_result),
-        .zero(zero),
-        .last_bit(last_bit)
+        .alu_result(alu_result)
     );
 
     //test logic
@@ -29,14 +25,12 @@ module ALU_tb;
         $display("Starting ALU Testbench...");
         
         //default case test
-        $display("Test 0: default case"); //should output 0
+        $display("\n--> Test 0: default case"); //should output 0
         test_num = 0;
         alu_control = 4'b1111; //undefined operation
         operand1 = $urandom();
         operand2 = $urandom();
         #1
-        $display("Result of %d + %d = %d with control %d", operand1, operand2, alu_result, alu_control);
-        assert (zero === 1'b1) else $error("Test Failed: Zero flag not set correctly for default case.");
         assert (alu_result === 32'b0) else $error("Test Failed: ALU result not zero for default case.");
         $display("Test 0 done.");
 
@@ -171,26 +165,10 @@ module ALU_tb;
             assert (alu_result === expected) else $error("Test Failed: SRA operation incorrect for operands %0d and %0d. Expected %0d, got %0d", $signed(operand1), operand2[4:0], expected, alu_result);
         end
         $display("Test 10 done.");
-
-
-        //last bit test
-        $display("--> Test 11: Last Bit test");
-        test_num = 11;
-        alu_control = 4'b0101; //SLT
-        for(int i = 0; i < 1000; i++) begin
-            operand1 = $urandom();
-            operand2 = $urandom();
-            expected = ($signed(operand1) < $signed(operand2)) ? 32'b1 : 32'b0;
-            #1;
-            assert (last_bit === expected) else $error("Test Failed: last_bit incorrect for operands %0d and %0d. Expected %0d, got %0d", $signed(operand1), $signed(operand2), expected, alu_result);
-        end
-        $display("Test 11 done.");
-
         
-
         test_num = 0;
         //end of tests
-        $display("All tests completed.");
+        $display("\nAll tests completed.\n");
         $finish;
     end
 endmodule
