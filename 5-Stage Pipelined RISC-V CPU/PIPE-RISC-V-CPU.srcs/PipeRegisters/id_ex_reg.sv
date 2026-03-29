@@ -5,7 +5,7 @@ module id_ex_reg(
     input logic rst, //active low reset
 
     //ID stage inputs
-    input logic RegWrite_in
+    input logic RegWrite_in,
     input logic [1:0] MemtoReg_in,
 
     input logic MemRead_in, MemWrite_in, Branch_in,
@@ -32,7 +32,7 @@ module id_ex_reg(
 
     always_ff @(posedge clk) begin : ID_EX_REG
         if(!rst) begin
-            Regwrite_out <= 1'b0;
+            RegWrite_out <= 1'b0;
             MemtoReg_out <= 2'b00;
             MemRead_out <= 1'b0;
             MemWrite_out <= 1'b0;
@@ -48,7 +48,7 @@ module id_ex_reg(
             rd_out <= 5'b0;
         end
         else begin
-            Reg_write_out <= RegWrite_in;
+            RegWrite_out <= RegWrite_in;
             MemtoReg_out <= MemtoReg_in;
             MemRead_out <= MemRead_in;
             MemWrite_out <= MemWrite_in;
