@@ -1,216 +1,161 @@
 `timescale 1ns / 1ps
 
-module cpu (
+module cpu(
     input logic clk,
-    input logic rst_n
+    input logic rst_n //active low reset
     );
 
     import signal_pkg::*;
 
-    // Program Counter
-    reg [31:0] pc;
-    logic [31:0] pc_next;
-    logic [31:0] pc_target;
-    logic [31:0] pc_plus4;
-    assign pc_plus4 = pc + 4;
+    /*
+     * ----------------------------
+     * IF stage (Instruction Fetch)
+     * ----------------------------
+     */
+    logic [31:0] if_PC, if_next_PC, if_instruction, if_pc_plus_4;
+
+    logic id_pc_source;
+    logic [31:0] id_branch_target;
+
+    assign if_pc_plus_4 = if_PC + 4;
 
     always_comb begin : pcSelect
-        case (pc_source)
-            1'b0 : pc_next = pc_plus4; //next instruction
-            1'b1 : pc_next = pc_target; //branch taken
+        case (id_pc_source)
+            1'b0: if_next_PC = if_pc_plus_4; //next instruction
+            1'b1: if_next_PC = id_branch_target; //branch taken
         endcase
     end
 
-    always_comb begin : second_add_select
-        case (second_add_source)
-            2'b00 : pc_target = pc + immediate; //branch target
-            2'b01 : pc_target = immediate; //jump target
-            2'b10 : pc_target = reg_data1 + immediate; //JALR target
-        endcase
-    end
-
-    always @(posedge clk) begin
-        if (rst_n == 0) begin
-            pc <= 32'b0;
-        end else begin
-            pc <= pc_next;
+    always_ff @(posedge clk) begin : pcUpdate
+        if(!rst_n) begin
+            if_PC <= 32'b0;
+        end
+        else begin
+            if_PC <= if_next_PC;
         end
     end
 
-    //Instruction Memory
-    wire [31:0] Instruction;
-
+    //Instruction Memory (read-only)
     memory #(
         .mem_init("instr_mem_test.hex")
     ) instruction_memory (
         .clk(clk),
         .rst_n(rst_n),
         .write_enable(1'b0),
-        .address(pc),
+        .address(if_PC),
         .write_data(32'b0),
         .byte_enable(4'b0000),
         
-        .read_data(Instruction)
+        .read_data(if_instruction)
     );
 
-    //Control
-    logic [6:0] op;
-    assign op = Instruction[6:0];
-    logic [2:0] func3;
-    assign func3 = Instruction[14:12];
-    logic [6:0] func7;
-    assign func7 = Instruction[31:25];
-    wire alu_zero;
-    wire alu_last_bit;
+    //IF --> ID pipeline register
+    logic [31:0] id_PC, id_instruction;
 
-    wire [3:0] alu_control;
-    wire [2:0] imm_source;
-    wire mem_write;
-    wire reg_write;
-    wire alu_source;
-    wire [1:0] write_back_source;
-    wire pc_source;
-    wire [1:0] second_add_source;
-    wire branch;
-    wire jump;
+    if_id_reg IF_ID_REG (
+        .clk(clk),
+        .rst_n(rst_n),
+        .PC_in(if_PC),
+        .instruction_in(if_instruction),
 
-    control control_unit (
-        .op(op),
-        .func3(func3),
-        .func7(func7),
-        .alu_zero(alu_zero),
-        .alu_last_bit(alu_last_bit),
-
-        .alu_control(alu_control),
-        .imm_source(imm_source),
-        .mem_write(mem_write),
-        .reg_write(reg_write),
-        .alu_source(alu_source),
-        .write_back_source(write_back_source),
-        .pc_source(pc_source),
-        .second_add_source(second_add_source),
-
-        .branch(branch),
-        .jump(jump)  
+        .PC_out(id_PC),
+        .instruction_out(id_instruction)
     );
 
-    //Registers
-    logic [4:0] rs1, rs2, rd;
-    assign rs1 = Instruction[19:15];
-    assign rs2 = Instruction[24:20];
-    assign rd = Instruction[11:7];
-    wire [31:0] reg_data1, reg_data2;
-    
-    logic wb_valid;
-    logic [31:0] write_data;
-    always_comb begin : wbSelect
-        case (write_back_source)
-            2'b00 : begin
-                write_data = alu_result;
-                wb_valid = 1'b1;
-            end
-            2'b01 : begin
-                write_data = mem_read_wb_data;
-                wb_valid = mem_read_wb_valid;
-            end
-            2'b10 : begin
-                write_data = pc_plus4;
-                wb_valid = 1'b1;
-            end
-            2'b11 : begin
-                write_data = pc_target;
-                wb_valid = 1'b1;
-            end
-        endcase
-    end
+    /*
+     * ----------------------------
+     * ID stage (Instruction Decode)
+     * ----------------------------
+     */
 
+    //decode instruction fields
+    logic [6:0] id_opcode = id_instruction[6:0];
+    logic [4:0] id_rd = id_instruction[11:7];
+    logic [2:0] id_func3 = id_instruction[14:12];
+    logic [4:0] id_rs1 = id_instruction[19:15];
+    logic [4:0] id_rs2 = id_instruction[24:20];
+    logic [6:0] id_func7 = id_instruction[31:25];
+
+    logic [31:0] id_read_data1, id_read_data2;
+
+    logic wb_reg_write_final = 1'b0;
+    logic [4:0] wb_write_address_final = 5'b0;
+    logic [31:0] wb_write_data_final = 32'b0;
+
+    //register file
     registers registers (
         .clk(clk),
         .rst_n(rst_n),
 
-        .read_address1(rs1),
-        .read_address2(rs2),
+        .read_address1(id_rs1),
+        .read_address2(id_rs2),
 
-        .read_data1(reg_data1),
-        .read_data2(reg_data2),
+        .read_data1(id_read_data1),
+        .read_data2(id_read_data2),
 
-        .write_enable(reg_write & wb_valid),
-        .write_data(write_data),
-        .write_address(rd)
+        .write_enable(wb_reg_write_final),
+        .write_data(wb_write_data_final),
+        .write_address(wb_write_address_final)
     );
 
-    //Sign Extend
-    logic [24:0] raw_src;
-    assign raw_src = Instruction[31:7];
-    wire [31:0] immediate;
+    //Sign Extender
+    logic [31:0] id_immediate;
+    logic [2:0] id_imm_source;
 
-    signextender sign_extender (
-        .raw_src(raw_src),
-        .imm_source(imm_source),
-        
-        .immediate(immediate)
+    signextender signextender (
+        .raw_src(id_instruction[31:7]),
+        .imm_source(id_imm_source),
+
+        .immediate(id_immediate)
     );
 
-    //ALU
-    wire [31:0] alu_result;
-    logic [31:0] alu_op2;
+    //ID stage Early Branch Compare
+    logic id_alu_zero;
+    logic id_alu_last_bit;
 
-    always_comb begin : alu_source_select
-        case (alu_source)
-            1'b1 : alu_op2 = immediate;
-            default : alu_op2 = reg_data2;
-        endcase
+    always_comb begin : IDBranchCompare
+        id_alu_zero = (id_read_data1 == id_read_data2);
+        if(id_func3 == FUNC3_BLTU || id_func3 == FUNC3_BGEU) begin
+            id_alu_last_bit = (id_read_data1 < id_read_data2); //unsigned
+        end
+        else begin
+            id_alu_last_bit = ($signed(id_read_data1) < $signed(id_read_data2)); //signed
+        end
     end
 
-    ALU alu_inst(
-        .alu_control(alu_control),
-        .operand1(reg_data1),
-        .operand2(alu_op2),
-        
-        .alu_result(alu_result),
-        .zero(alu_zero),
-        .last_bit(alu_last_bit)
+    //Control Unit
+    logic [3:0] id_alu_control;
+    logic id_mem_write, id_reg_write, id_alu_source;
+    logic [1:0] id_write_back_source, id_second_add_source;
+    logic id_branch, id_jump;
+
+    control control_unit (
+        .op(id_opcode),
+        .func3(id_func3),
+        .func7(id_func7),
+        .alu_zero(id_alu_zero),
+        .alu_last_bit(id_alu_last_bit),
+
+        .alu_control(id_alu_control),
+        .imm_source(id_imm_source),
+        .mem_write(id_mem_write),
+        .reg_write(id_reg_write),
+        .alu_source(id_alu_source),
+        .write_back_source(id_write_back_source),
+        .pc_source(id_pc_source), //Sends control signal to IF stage for branch decision
+        .second_add_source(id_second_add_source),
+
+        .branch(id_branch),
+        .jump(id_jump)
     );
 
-    wire [3:0] mem_byte_enable;
-    wire [31:0] mem_write_data;
-
-    be_decoder be_decode(
-        .alu_result_address(alu_result),
-        .func3(func3),
-        .reg_read(reg_data2),
-
-        .byte_enable(mem_byte_enable),
-        .data(mem_write_data)
-    );
-
-    //Data Memory
-    wire [31:0] mem_read;
-
-    memory #(
-        .mem_init("data_mem_test.hex")
-    ) data_memory (
-        .clk(clk),
-        .address({alu_result[31:2], 2'b00}),
-        .write_data(mem_write_data),
-        .write_enable(mem_write),
-        .byte_enable(mem_byte_enable),
-        .rst_n(1'b1),
-
-        .read_data(mem_read)
-    );
-
-    //Reader
-    wire [31:0] mem_read_wb_data;
-    wire mem_read_wb_valid;
-
-    reader reader (
-        .mem_data(mem_read),
-        .be_mask(mem_byte_enable),
-        .func3(func3),
-
-        .wb_data(mem_read_wb_data),
-        .valid(mem_read_wb_valid)
-    );
-
+    //ID stage Early Branch Adder
+    always_comb begin : IDTargetBaseSelect
+        case (id_second_add_source)
+            2'b00: id_branch_target = id_PC + id_immediate; // Branches, JAL, AUIPC
+            2'b01: id_branch_target = id_immediate; // LUI
+            2'b10: id_branch_target = id_read_data1 + id_immediate; // JALR
+            default: id_branch_target = id_PC + id_immediate;
+        endcase
+    end
 endmodule
