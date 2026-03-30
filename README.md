@@ -19,6 +19,8 @@ The repository is organized into two main Xilinx Vivado projects, each containin
 - `Standard RISC-V CPU/` - Contains the single-cycle processor project.
 - `5-Stage Pipelined RISC-V CPU/` - Contains the pipelined processor project.
   - `PIPE-RISC-V-CPU.srcs/PipeRegisters/` - Contains the inter-stage pipeline registers.
+  - `PIPE-RISC-V-CPU.srcs/forwarding/` - Contains the Forwarding Unit for data hazards
+  - `PIPE-RISC-V-CPU.srcs/hazard_detection/` - Contains the Hazard Detection Unit to stall the Pipeline for load-use and control hazards.
 
 **Shared Source Directory Structure:**
 - `ALU/`: Arithmetic Logic Unit
