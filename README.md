@@ -81,12 +81,11 @@ The following table lists the status of the RV32I base integer instructions supp
 | 39| `ECALL`     |     ❌     |   ❌   |   ❌   | 
 | 40| `EBREAK`    |     ❌     |   ❌   |   ❌   | 
 
-## 📚 Resources
+## Resources
 
 - **RISC-V ISA Manuals:**
-  - [The RISC-V Instruction Set Manual Volume I: User-Level ISA (v2.2)](https://riscv.org/wp-content/uploads/2017/05/riscv-spec-v2.2.pdf)
-  - [The RISC-V Instruction Set Manual Volume I: Unprivileged ISA (20191213)](https://riscv.org/wp-content/uploads/2019/12/riscv-spec-20191213.pdf)
+  - [The RISC-V Instruction Set Manual Volume I](https://riscv.org/specifications/ratified/)
 
-## 🤝 Contributors
+## Contributors
 
-- [Siddarth Kota](https://github.com/your-username)
+- [Siddarth Kota](https://github.com/Siddarth-Kota)
