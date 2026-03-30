@@ -32,7 +32,7 @@ module cpu_tb;
             pc_WB    <= 32'h00000000;
         end 
         else begin
-            inst_EX  <= dut.id_instruction;
+            inst_EX  <= dut.hazard_stall ? 32'h00000013 : dut.id_instruction;
             inst_MEM <= inst_EX;
             inst_WB  <= inst_MEM;
 
@@ -88,47 +88,47 @@ module cpu_tb;
         repeat(4) @(posedge clk); #0.1;
 
 
-        $display("\n--> Test 1: I-type ADDI Instruction (x1 = 0x111)");
+        $display("\n--> Test 1");
         test_num = 1;
 
-        @(posedge clk); #0.1;
+        @(posedge clk); #0.1; //ADDI x1, x0, 0x111
         
-        assert (dut.registers.reg_array[1] == 32'h00000111) else $error("ADDI Test 1 Failed. Expected 00000111, got %h", dut.registers.reg_array[1]);
+        assert(dut.registers.reg_array[1] == 32'h00000111) else $error("ADDI Test 1 Failed. Expected 00000111, got %h", dut.registers.reg_array[1]);
         $display("Test 1 done");
 
-        $display("\n--> Test 2: I-type ADDI Instruction (x2 = 0x222)");
+        $display("\n--> Test 2");
         test_num = 2;
         
-        @(posedge clk); #0.1;
+        @(posedge clk); #0.1; //SW x1, 0(x0)
 
-        assert (dut.registers.reg_array[2] == 32'h00000222) else $error("ADDI Test 2 Failed. Expected 00000222, got %h", dut.registers.reg_array[2]);
+        assert(dut.data_memory.mem_array[0] == 32'h00000111) else $error("SW Test 2 Failed. Expected mem[0] = 00000111, got %h", dut.data_memory.mem_array[0]);
         $display("Test 2 done");
     
 
-        $display("\n--> Test 3: R-type ADD Instruction (x3 = x1 + x2)");
+        $display("\n--> Test 3");
         test_num = 3;
         
-        @(posedge clk); #0.1;
+        @(posedge clk); #0.1; //LW x2, 0(x0)
 
-        assert (dut.registers.reg_array[3] == 32'h00000333) else $error("ADD Test 3 Failed. Expected 00000333, got %h", dut.registers.reg_array[3]);
+        assert(dut.registers.reg_array[2] == 32'h00000111) else $error("LW Test 3 Failed. Expected 00000111, got %h", dut.registers.reg_array[2]);
         $display("Test 3 done");
 
 
-        $display("\n--> Test 4: S-type SW Instruction (mem[3] = x3)");
+        $display("\n--> Test 4");
         test_num = 4;
         
-        @(posedge clk); #0.1;
+        repeat(2) @(posedge clk); #0.1; //ADD x3, x2, x1
 
-        assert (dut.data_memory.mem_array[3] == 32'h00000333) else $error("SW Test 4 Failed. Expected 00000333, got %h", dut.data_memory.mem_array[3]);
+        assert(dut.registers.reg_array[3] == 32'h00000222) else $error("ADD Test 4 Failed. Expected 00000222, got %h", dut.registers.reg_array[3]);
         $display("Test 4 done");
 
 
-        $display("\n--> Test 5: I-type LW Instruction (x4 = mem[3])");
+        $display("\n--> Test 5");
         test_num = 5;
         
-        @(posedge clk); #0.1;
+        @(posedge clk); #0.1; //ADD x4, x3, x1
         
-        assert (dut.registers.reg_array[4] == 32'h00000333) else $error("LW Test 5 Failed. Expected 00000333, got %h", dut.registers.reg_array[4]);
+        assert(dut.registers.reg_array[4] == 32'h00000333) else $error("ADD Test 5 Failed. Expected 00000333, got %h", dut.registers.reg_array[4]);
         $display("Test 5 done");
 
         test_num = 0;

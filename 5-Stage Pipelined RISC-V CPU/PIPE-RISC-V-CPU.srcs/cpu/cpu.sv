@@ -20,7 +20,7 @@ module cpu(
     assign if_pc_plus_4 = if_PC + 4;
 
     always_comb begin : pcSelect
-        case (id_pc_source)
+        case (id_pc_source & ~hazard_stall) //If there's a hazard stall, force NOP
             1'b0: if_next_PC = if_pc_plus_4; //next instruction
             1'b1: if_next_PC = id_branch_target; //branch taken
         endcase
@@ -30,7 +30,7 @@ module cpu(
         if(!rst_n) begin
             if_PC <= 32'b0;
         end
-        else begin
+        else if(!hazard_stall) begin
             if_PC <= if_next_PC;
         end
     end
@@ -55,8 +55,8 @@ module cpu(
     if_id_reg IF_ID_REG (
         .clk(clk),
         .rst_n(rst_n),
-        .PC_in(if_PC),
-        .instruction_in(if_instruction),
+        .PC_in(hazard_stall ? id_PC : if_PC), //If there's a hazard stall, force NOP
+        .instruction_in(hazard_stall ? id_instruction : if_instruction), //If there's a hazard stall, force NOP
 
         .PC_out(id_PC),
         .instruction_out(id_instruction)
@@ -164,6 +164,19 @@ module cpu(
         endcase
     end
 
+    //Hazard Detection Unit
+    logic hazard_stall;
+
+    hazard_detection_unit hazard_detection (
+        .id_rs1(id_rs1),
+        .id_rs2(id_rs2),
+        .ex_rd(ex_rd),
+        .ex_write_back_source(ex_write_back_source),
+
+        .stall(hazard_stall)
+    );
+
+
     //ID --> EX pipeline register
     logic [3:0] ex_alu_control;
     logic ex_mem_write, ex_reg_write, ex_alu_source;
@@ -179,9 +192,9 @@ module cpu(
         .clk(clk),
         .rst_n(rst_n),
 
-        .RegWrite_in(id_reg_write),
+        .RegWrite_in(id_reg_write & ~hazard_stall), //If there's a hazard stall, force NOP
         .MemtoReg_in(id_write_back_source),
-        .MemWrite_in(id_mem_write),
+        .MemWrite_in(id_mem_write & ~hazard_stall), //If there's a hazard stall, force NOP
         .ALUSrc_in(id_alu_source),
         .ALUOp_in(id_alu_control),
 
