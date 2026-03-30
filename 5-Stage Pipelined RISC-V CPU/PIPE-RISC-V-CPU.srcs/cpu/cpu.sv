@@ -69,18 +69,24 @@ module cpu(
      */
 
     //decode instruction fields
-    logic [6:0] id_opcode = id_instruction[6:0];
-    logic [4:0] id_rd = id_instruction[11:7];
-    logic [2:0] id_func3 = id_instruction[14:12];
-    logic [4:0] id_rs1 = id_instruction[19:15];
-    logic [4:0] id_rs2 = id_instruction[24:20];
-    logic [6:0] id_func7 = id_instruction[31:25];
+    logic [6:0] id_opcode;
+    assign id_opcode = id_instruction[6:0];
+    logic [4:0] id_rd;
+    assign id_rd = id_instruction[11:7];
+    logic [2:0] id_func3;
+    assign id_func3 = id_instruction[14:12];
+    logic [4:0] id_rs1;
+    assign id_rs1 = id_instruction[19:15];
+    logic [4:0] id_rs2;
+    assign id_rs2 = id_instruction[24:20];
+    logic [6:0] id_func7;
+    assign id_func7 = id_instruction[31:25];
 
     logic [31:0] id_read_data1, id_read_data2;
 
-    logic wb_reg_write_final = 1'b0;
-    logic [4:0] wb_write_address_final = 5'b0;
-    logic [31:0] wb_write_data_final = 32'b0;
+    logic wb_reg_write_final;
+    logic [4:0] wb_write_address_final;
+    logic [31:0] wb_write_data_final;
 
     //register file
     registers registers (
@@ -322,7 +328,7 @@ module cpu(
         .func3(mem_func3),
 
         .wb_data(mem_read_wb_data),
-        .wb_valid(mem_read_wb_valid)
+        .valid(mem_read_wb_valid)
     );
 
     //MEM --> WB pipeline register
@@ -340,7 +346,7 @@ module cpu(
 
         .mem_read_valid_in(mem_read_wb_valid),
 
-        .mem_read_data_in(mem_read_wb_data),
+        .read_data_in(mem_read_wb_data),
         .ALU_result_in(mem_alu_result),
         .pc_plus_4_in(mem_pc_plus_4),
         .branch_target_in(mem_branch_target),
@@ -352,7 +358,7 @@ module cpu(
 
         .mem_read_valid_out(wb_mem_read_valid),
 
-        .mem_read_data_out(wb_mem_read_data),
+        .read_data_out(wb_mem_read_data),
         .ALU_result_out(wb_alu_result),
         .pc_plus_4_out(wb_pc_plus_4),
         .branch_target_out(wb_branch_target),
