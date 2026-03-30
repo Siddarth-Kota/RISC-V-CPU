@@ -1,20 +1,16 @@
 # RV32I RISC-V Processor
 
-![SystemVerilog](https://img.shields.io/badge/Language-SystemVerilog-blue.svg)
-![Architecture](https://img.shields.io/badge/Architecture-RV32I-orange.svg)
-![EDA](https://img.shields.io/badge/EDA-Xilinx_Vivado-lightgrey.svg)
-
-This repository contains my SystemVerilog implementation of the RV32I base integer instruction set architecture.
+This repository contains my SystemVerilog implementation of the RV32I base integer instruction set architecture. Testing and development was done in AMD Xilinx Vivado
 
 ## Overview
 
 1. **Standard RISC-V CPU:** A single-cycle implementation designed for simplicity and baseline instruction verification.
 2. **5-Stage Pipelined RISC-V CPU:** A high-performance pipelined architecture featuring the classic 5-stages:
-    1. **IF** - Instruction Fetch
-    2. **ID** - Instruction Decode
-    3. **EX** - Execute
-    4. **MEM** - Memory
-    5. **WB** - Write Back
+    - **IF** - Instruction Fetch
+    - **ID** - Instruction Decode
+    - **EX** - Execute
+    - **MEM** - Memory
+    - **WB** - Write Back
 
 ## Folder Structure
 
@@ -25,13 +21,13 @@ The repository is organized into two main Xilinx Vivado projects, each containin
   - `PIPE-RISC-V-CPU.srcs/PipeRegisters/` - Contains the inter-stage pipeline registers.
 
 **Shared Source Directory Structure:**
-- `ALU/`: Arithmetic Logic Unit and corresponding testbench.
-- `be_decoder/`: Branch/Exception decoding logic.
+- `ALU/`: Arithmetic Logic Unit
+- `be_decoder/`: Byte Enable decoding logic.
 - `control/`: Main control unit logic.
-- `cpu/`: Top-level CPU wrappers and main testbenches. Includes memory initialization files (`instr_mem_test.hex`, `data_mem_test.hex`).
+- `cpu/`: Top-level CPU module. Includes memory initialization files (`instr_mem_test.hex`, `data_mem_test.hex`).
 - `memory/`: Instruction and Data memory modules.
-- `reader/`: Instruction reading logic.
-- `registers/`: The 32x32 register file implementation.
+- `reader/`: Memory Alignment Unit
+- `registers/`: Register Implementation
 - `signextender/`: Immediate generation and sign-extension logic.
 
 ## Implemented Instructions
