@@ -223,26 +223,57 @@ module cpu(
      * ----------------------------
      */
 
+    //Forwarding Unit
+    logic [1:0] forwardA, forwardB;
+    logic [31:0] forwarded_read_data1, forwarded_read_data2;
+
+    forwarding forwarding_unit (
+        .ex_rs1(ex_rs1),
+        .ex_rs2(ex_rs2),
+        .mem_rd(mem_rd),
+        .wb_rd(wb_write_address_final),
+        .mem_reg_write(mem_reg_write),
+        .wb_reg_write(wb_reg_write_final),
+
+        .forwardA(forwardA),
+        .forwardB(forwardB)
+    );
+
+    always_comb begin : ForwardingSelect
+        case (forwardA)
+            2'b00: forwarded_read_data1 = ex_read_data1; //No hazard
+            2'b01: forwarded_read_data1 = mem_alu_result; //Forward from MEM stage
+            2'b10: forwarded_read_data1 = wb_write_data_final; //Forward from WB stage
+            default: forwarded_read_data1 = ex_read_data1;
+        endcase
+        case (forwardB)
+            2'b00: forwarded_read_data2 = ex_read_data2; //No hazard
+            2'b01: forwarded_read_data2 = mem_alu_result; //Forward from MEM stage
+            2'b10: forwarded_read_data2 = wb_write_data_final; //Forward from WB stage
+            default: forwarded_read_data2 = ex_read_data2;
+        endcase
+    end
+
     //ALU
     logic [31:0] alu_operand2;
     logic [31:0] ex_alu_result;
 
     always_comb begin : ALUSrcSelect
         case (ex_alu_source)
-            1'b0: alu_operand2 = ex_read_data2;
+            1'b0: alu_operand2 = forwarded_read_data2;
             1'b1: alu_operand2 = ex_immediate;
-            default: alu_operand2 = ex_read_data2;
+            default: alu_operand2 = forwarded_read_data2;
         endcase
     end
 
     ALU ALU (
-        .operand1(ex_read_data1),
+        .operand1(forwarded_read_data1),
         .operand2(alu_operand2),
         .alu_control(ex_alu_control),
 
         .alu_result(ex_alu_result)
     );
-
+    
     //Byte Enable Decoder
     logic [3:0] ex_mem_byte_enable;
     logic [31:0] ex_mem_write_data;
@@ -250,7 +281,7 @@ module cpu(
     be_decoder be_decode (
         .alu_result_address(ex_alu_result),
         .func3(ex_func3),
-        .reg_read(ex_read_data2),
+        .reg_read(forwarded_read_data2),
 
         .byte_enable(ex_mem_byte_enable),
         .data(ex_mem_write_data)
