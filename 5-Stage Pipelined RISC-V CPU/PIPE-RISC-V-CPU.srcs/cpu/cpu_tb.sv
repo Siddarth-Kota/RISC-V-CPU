@@ -18,7 +18,7 @@ module cpu_tb;
         forever #5 clk = ~clk;
     end
 
-    // Pipeline tracking registers for debug printing
+    // Pipeline stage tracking
     logic [31:0] inst_EX, inst_MEM, inst_WB;
     logic [31:0] pc_EX, pc_MEM, pc_WB;
 
