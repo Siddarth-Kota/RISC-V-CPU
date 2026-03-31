@@ -81,7 +81,6 @@ module cpu_tb;
                     $display(" >>> STATUS: HAZARD DETECTED! Pipeline Stalled.");
                 end
             end
-            
             if(dut.if_flush) begin
                 $display(" >>> STATUS: Control Hazard Detected (Branch/Jump Taken)! Flushing IF stage.");
             end
