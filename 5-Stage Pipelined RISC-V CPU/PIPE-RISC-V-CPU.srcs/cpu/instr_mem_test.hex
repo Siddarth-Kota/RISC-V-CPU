@@ -23,7 +23,7 @@ FFF1C313  // 0x14: XORI  x6, x3, -1       | x6 <= 0  (-1 ^ -1)
 0041D933  // 0x44: SRL   x18, x3, x4      | x18 <= 0x7FFFFFFF (-1 >> 1 logical)
 4041D9B3  // 0x48: SRA   x19, x3, x4      | x19 <= 0xFFFFFFFF (-1 >> 1 arith)
 0041EA33  // 0x4C: OR    x20, x3, x4      | x20 <= 0xFFFFFFFF (-1 | 1)
-0041FAB3  // 0x50: AND   x21, x3, x4      | x21 <= 1  (-1 & 1) [FIXED HEX]
+0041FAB3  // 0x50: AND   x21, x3, x4      | x21 <= 1  (-1 & 1)
 
 // I-Type and S-type Load/Store Instructions
 00302023  // 0x54: SW    x3, 0(x0)        | mem[0:3] <= 0xFFFFFFFF

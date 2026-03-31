@@ -68,8 +68,20 @@ module cpu_tb;
             $display("MEM | PC = 0x%08h | Hex: 0x%08h --> [%s] | alu_pass/address = 0x%08h | write_data = 0x%08h | read_data = 0x%08h", pc_MEM, inst_MEM, mem_str, dut.mem_alu_result, dut.mem_write_data, dut.mem_read_wb_data);    
             $display("WB  | PC = 0x%08h | Hex: 0x%08h --> [%s] | reg_write_data = 0x%08h", pc_WB, inst_WB, wb_str, dut.wb_write_data_final);
             if (dut.hazard_stall) begin
-                $display(" >>> STATUS: HAZARD DETECTED (Load-Use)! Pipeline Stalled by 1 cycle.");
+                if (dut.hazard_detection_unit.load_use_stall) begin
+                    $display(" >>> STATUS: DATA HAZARD (Load-Use)! ID stage needs data from a Load in EX. Stalling.");
+                end
+                else if (dut.hazard_detection_unit.jalr_stall) begin
+                    $display(" >>> STATUS: EARLY JUMP HAZARD (JALR)! ID stage needs target data from EX/MEM. Stalling.");
+                end
+                else if (dut.hazard_detection_unit.branch_stall) begin
+                    $display(" >>> STATUS: EARLY BRANCH HAZARD (B-Type)! ID stage needs compare data from EX/MEM. Stalling.");
+                end
+                else begin
+                    $display(" >>> STATUS: HAZARD DETECTED! Pipeline Stalled.");
+                end
             end
+            
             if(dut.if_flush) begin
                 $display(" >>> STATUS: Control Hazard Detected (Branch/Jump Taken)! Flushing IF stage.");
             end
@@ -316,22 +328,21 @@ module cpu_tb;
         test_num = 37;
         $display("\n--> Test %0d: J-type Instruction (JAL)", test_num);
         repeat(2) @(posedge clk); #0.1; 
-        assert(dut.registers.reg_array[27] == 32'h000000B0) else $error("Test %0d Failed: Expected PC+4 = 0x000000B0, got 0x%08h", test_num, dut.registers.reg_array[27]);
+        assert(dut.registers.reg_array[27] == 32'h000000B0) else $error("Test %0d Failed", test_num);
         $display("Test %0d Complete\n", test_num);
 
         test_num = 38;
         $display("\n--> Test %0d: I-type Instruction (JALR)", test_num);
-        repeat(2) @(posedge clk); #0.1; 
-        assert(dut.registers.reg_array[28] == 32'h000000B8) else $error("Test %0d Failed: Expected PC+4 = 0x000000B8, got 0x%08h", test_num, dut.registers.reg_array[28]);
+        repeat(4) @(posedge clk); #0.1; 
+        assert(dut.registers.reg_array[28] == 32'h000000B8) else $error("Test %0d Failed", test_num);
         $display("Test %0d Complete\n", test_num);
 
         test_num = 39;
         $display("\n--> Test %0d: Final Execution Survival Check", test_num);
         @(posedge clk); #0.1; //ADDI x31, x0, 99
-        assert(dut.registers.reg_array[31] == 32'd99) else $error("Test %0d Failed: Final target missed! CPU got lost. Expected 99, got %0d", test_num, dut.registers.reg_array[31]);
+        assert(dut.registers.reg_array[31] == 32'd99) else $error("Test %0d Failed", test_num);
         $display("Test %0d Complete\n", test_num);
 
-    
         test_num = 0;
         $display("\nCPU Pipelined TestBench Complete\n");
         $finish;

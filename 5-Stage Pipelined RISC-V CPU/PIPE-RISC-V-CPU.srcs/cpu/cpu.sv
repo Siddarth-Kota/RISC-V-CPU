@@ -185,11 +185,15 @@ module cpu(
     //Hazard Detection Unit
     logic hazard_stall;
 
-    hazard_detection_unit hazard_detection (
+    hazard_detection hazard_detection_unit (
+        .id_opcode(id_opcode),
         .id_rs1(id_rs1),
         .id_rs2(id_rs2),
+        .ex_reg_write(ex_reg_write),
         .ex_rd(ex_rd),
         .ex_write_back_source(ex_write_back_source),
+        .mem_reg_write(mem_reg_write),
+        .mem_rd(mem_rd),
 
         .stall(hazard_stall)
     );
