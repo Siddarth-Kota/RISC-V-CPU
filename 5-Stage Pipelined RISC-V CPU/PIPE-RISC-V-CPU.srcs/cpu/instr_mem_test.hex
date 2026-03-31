@@ -1,128 +1,57 @@
-11100093  //CPU TEST START   :       ADDI x1, x0, 0x111              | x1 <= 00000111       PC = 0x000
-00102023  //                         SW x1, 0(x0)                    | mem[0] <= 00000111   PC = 0x004
-00002103  //                         LW x2, 0(x0)                    | x2 <= 00000111       PC = 0x008
-001101B3  //                         ADD x3, x2, x1                  | x3 <= 00000222       PC = 0x00C
-00118233  //                         ADD x4, x3, x1                  | x4 <= 00000333       PC = 0x010
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
-00000013  //NOP
+// U-type Instructions
+000010B7  // 0x00: LUI   x1, 0x1          | x1 <= 0x00001000
+00001117  // 0x04: AUIPC x2, 0x1          | x2 <= 0x00001004 (PC + 0x1000)
+
+//I-Type Arithmetic/Logic Instructions
+FFF00193  // 0x08: ADDI  x3, x0, -1       | x3 <= 0xFFFFFFFF (-1)
+0011A213  // 0x0C: SLTI  x4, x3, 1        | x4 <= 1  (-1 < 1 is TRUE)
+0011B293  // 0x10: SLTIU x5, x3, 1        | x5 <= 0  (MAX < 1 is FALSE)
+FFF1C313  // 0x14: XORI  x6, x3, -1       | x6 <= 0  (-1 ^ -1)
+0001E393  // 0x18: ORI   x7, x3, 0        | x7 <= 0xFFFFFFFF (-1 | 0)
+0011F413  // 0x1C: ANDI  x8, x3, 1        | x8 <= 1  (-1 & 1)
+00119493  // 0x20: SLLI  x9, x3, 1        | x9 <= 0xFFFFFFFE (-2)
+0011D513  // 0x24: SRLI  x10, x3, 1       | x10 <= 0x7FFFFFFF (Logical Shift)
+4011D593  // 0x28: SRAI  x11, x3, 1       | x11 <= 0xFFFFFFFF (Arithmetic Shift)
+
+//R-Type Arithmetic/Logic Instructions
+00418633  // 0x2C: ADD   x12, x3, x4      | x12 <= 0 (-1 + 1)
+404186B3  // 0x30: SUB   x13, x3, x4      | x13 <= 0xFFFFFFFE (-1 - 1)
+00419733  // 0x34: SLL   x14, x3, x4      | x14 <= 0xFFFFFFFE (-1 << 1)
+0041A7B3  // 0x38: SLT   x15, x3, x4      | x15 <= 1  (-1 < 1 is TRUE)
+0041B833  // 0x3C: SLTU  x16, x3, x4      | x16 <= 0  (MAX < 1 is FALSE)
+0041C8B3  // 0x40: XOR   x17, x3, x4      | x17 <= 0xFFFFFFFE (-1 ^ 1)
+0041D933  // 0x44: SRL   x18, x3, x4      | x18 <= 0x7FFFFFFF (-1 >> 1 logical)
+4041D9B3  // 0x48: SRA   x19, x3, x4      | x19 <= 0xFFFFFFFF (-1 >> 1 arith)
+0041EA33  // 0x4C: OR    x20, x3, x4      | x20 <= 0xFFFFFFFF (-1 | 1)
+0041FAB3  // 0x50: AND   x21, x3, x4      | x21 <= 1  (-1 & 1) [FIXED HEX]
+
+// I-Type and S-type Load/Store Instructions
+00302023  // 0x54: SW    x3, 0(x0)        | mem[0:3] <= 0xFFFFFFFF
+00301223  // 0x58: SH    x3, 4(x0)        | mem[4:5] <= 0xFFFF
+00300423  // 0x5C: SB    x3, 8(x0)        | mem[8]   <= 0xFF
+00002B03  // 0x60: LW    x22, 0(x0)       | x22 <= 0xFFFFFFFF
+00401B83  // 0x64: LH    x23, 4(x0)       | x23 <= 0xFFFFFFFF (Sign Ext)
+00800C03  // 0x68: LB    x24, 8(x0)       | x24 <= 0xFFFFFFFF (Sign Ext)
+00405C83  // 0x6C: LHU   x25, 4(x0)       | x25 <= 0x0000FFFF (Zero Ext)
+00804D03  // 0x70: LBU   x26, 8(x0)       | x26 <= 0x000000FF (Zero Ext)
+
+//B-Type Branch, J-Type Jump, I-Type Jump Instructions
+00418463  // 0x74: BEQ   x3, x4, 8        | (15 == 1 -> FALSE). Branch not taken
+04D00E93  // 0x78: ADDI  x29, x0, 77      | x29 <= 77. [WILL NOT BE FLUSHED]
+01618463  // 0x7C: BEQ   x3, x22, 8       | (-1 == -1) -> Flushes next, Jumps to 0x84
+06500E93  // 0x80: ADDI  x29, x0, 101     | x29 <= 101 [WILL BE FLUSHED]
+00419463  // 0x84: BNE   x3, x4,  8       | (-1 != 1)  -> Flushes next, Jumps to 0x8C
+06500E93  // 0x88: ADDI  x29, x0, 101     | x29 <= 101 [WILL BE FLUSHED]
+0041C463  // 0x8C: BLT   x3, x4,  8       | (-1 < 1)   -> Flushes next, Jumps to 0x94 [FIXED]
+06500E93  // 0x90: ADDI  x29, x0, 101     | x29 <= 101 [WILL BE FLUSHED]
+00325463  // 0x94: BGE   x4, x3,  8       | (1 >= -1)  -> Flushes next, Jumps to 0x9C [FIXED]
+06500E93  // 0x98: ADDI  x29, x0, 101     | x29 <= 101 [WILL BE FLUSHED]
+00326463  // 0x9C: BLTU  x4, x3,  8       | (1 < MAX)  -> Flushes next, Jumps to 0xA4
+06500E93  // 0xA0: ADDI  x29, x0, 101     | x29 <= 101 [WILL BE FLUSHED]
+0041F463  // 0xA4: BGEU  x3, x4,  8       | (MAX >= 1) -> Flushes next, Jumps to 0xAC
+06500E93  // 0xA8: ADDI  x29, x0, 101     | x29 <= 101 [WILL BE FLUSHED]
+00800DEF  // 0xAC: JAL   x27, 8           | x27 <= 0xB0. Flushes next, Jumps to 0xB4
+06500E93  // 0xB0: ADDI  x29, x0, 101     | x29 <= 101 [WILL BE FLUSHED]
+008D8E67  // 0xB4: JALR  x28, x27, 8      | Target = 0xB0+8. Jumps to 0xBC
+06500E93  // 0xB8: ADDI  x29, x0, 101     | x29 <= 101 [WILL BE FLUSHED]
+06300F93  // 0xBC: ADDI  x31, x0, 99      | x31 <= 99

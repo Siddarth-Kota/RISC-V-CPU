@@ -52,11 +52,29 @@ module cpu(
     //IF --> ID pipeline register
     logic [31:0] id_PC, id_instruction;
 
+    logic [31:0] id_instruction_final, id_PC_final;
+    always_comb begin : HazardSelect
+        case({hazard_stall, if_flush})
+            2'b00: begin
+                id_instruction_final = if_instruction;
+                id_PC_final = if_PC;
+            end
+            2'b01: begin
+                id_instruction_final = 32'h00000013; //NOP
+                id_PC_final = if_PC;
+            end
+            2'b1x: begin
+                id_instruction_final = 32'h00000013; //NOP
+                id_PC_final = id_PC;
+            end
+        endcase
+    end
+
     if_id_reg IF_ID_REG (
         .clk(clk),
         .rst_n(rst_n),
-        .PC_in(hazard_stall ? id_PC : if_PC), //If there's a hazard stall, force NOP
-        .instruction_in(hazard_stall ? id_instruction : if_instruction), //If there's a hazard stall, force NOP
+        .PC_in(id_PC_final),
+        .instruction_in(id_instruction_final),
 
         .PC_out(id_PC),
         .instruction_out(id_instruction)
@@ -175,6 +193,10 @@ module cpu(
 
         .stall(hazard_stall)
     );
+
+    //Flush logic for control hazards (branches/jumps)
+    logic if_flush;
+    assign if_flush = id_pc_source & ~hazard_stall;
 
 
     //ID --> EX pipeline register
