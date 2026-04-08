@@ -1,6 +1,6 @@
 # RV32I RISC-V Processor
 
-This repository contains my SystemVerilog implementation of the RV32I base integer instruction set architecture. Testing and development was done in AMD Xilinx Vivado
+This repository contains my SystemVerilog implementation of the RV32I base integer instruction set architecture. Testing and development were done in AMD Xilinx Vivado
 
 ## Overview
 
@@ -21,6 +21,7 @@ The repository is organized into two main Xilinx Vivado projects, each containin
   - `PIPE-RISC-V-CPU.srcs/PipeRegisters/` - Contains the inter-stage pipeline registers.
   - `PIPE-RISC-V-CPU.srcs/forwarding/` - Contains the Forwarding Unit for data hazards
   - `PIPE-RISC-V-CPU.srcs/hazard_detection/` - Contains the Hazard Detection Unit to stall the Pipeline.
+  - `PIPE-RISC-V-CPU.srcs/branch_predicter/` - Contains the Branch Prediction unit to minimize cycle penalties
 
 **Shared Source Directory Structure:**
 - `ALU/`: Arithmetic Logic Unit
