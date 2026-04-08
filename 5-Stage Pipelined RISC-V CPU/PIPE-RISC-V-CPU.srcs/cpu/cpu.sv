@@ -13,17 +13,39 @@ module cpu(
      * ----------------------------
      */
     logic [31:0] if_PC, if_next_PC, if_instruction, if_pc_plus_4;
+    assign if_pc_plus_4 = if_PC + 4;
+
+    logic if_predict_taken;
+    logic [31:0] if_predicted_target;
+
+    branch_predictor branch_predictor (
+        .clk(clk),
+        .rst_n(rst_n),
+
+        .if_pc(if_PC),
+        .id_is_branch(id_branch | id_jump),
+        .id_pc(id_PC),
+        .id_actual_taken(id_pc_source),
+        .id_actual_target(id_branch_target),
+
+        .predict_taken(if_predict_taken),
+        .predicted_target(if_predicted_target)
+    );
 
     logic id_pc_source;
     logic [31:0] id_branch_target;
 
-    assign if_pc_plus_4 = if_PC + 4;
 
     always_comb begin : pcSelect
-        case (id_pc_source & ~hazard_stall) //If there's a hazard stall, force NOP
-            1'b0: if_next_PC = if_pc_plus_4; //next instruction
-            1'b1: if_next_PC = id_branch_target; //branch taken
-        endcase
+        if(id_mispredict && ~hazard_stall) begin //ID stage detects misprediction
+            if_next_PC = id_recovery_target;
+        end
+        else if(if_predict_taken & ~hazard_stall) begin //Predictor says to take a branch
+            if_next_PC = if_predicted_target;
+        end
+        else begin
+            if_next_PC = if_pc_plus_4;
+        end
     end
 
     always_ff @(posedge clk) begin : pcUpdate
@@ -51,21 +73,32 @@ module cpu(
 
     //IF --> ID pipeline register
     logic [31:0] id_PC, id_instruction;
+    logic id_predict_taken;
+    logic [31:0] id_predicted_target;
 
     logic [31:0] id_instruction_final, id_PC_final;
+    logic id_predict_taken_final;
+    logic [31:0] id_predicted_target_final;
+
     always_comb begin : HazardSelect
         case({hazard_stall, if_flush})
-            2'b00: begin
+            2'b00: begin //Normal operation, no stall or flush
                 id_instruction_final = if_instruction;
                 id_PC_final = if_PC;
+                id_predict_taken_final = if_predict_taken;
+                id_predicted_target_final = if_predicted_target;
             end
             2'b01: begin
                 id_instruction_final = 32'h00000013; //NOP
                 id_PC_final = if_PC;
+                id_predict_taken_final = 1'b0; //clear prediction on stall
+                id_predicted_target_final = 32'b0;
             end
             2'b1x: begin
                 id_instruction_final = 32'h00000013; //NOP
                 id_PC_final = id_PC;
+                id_predict_taken_final = 1'b0; //clear prediction on stall
+                id_predicted_target_final = 32'b0;
             end
         endcase
     end
@@ -73,11 +106,16 @@ module cpu(
     if_id_reg IF_ID_REG (
         .clk(clk),
         .rst_n(rst_n),
+
         .PC_in(id_PC_final),
         .instruction_in(id_instruction_final),
+        .predict_taken_in(id_predict_taken_final),
+        .predicted_target_in(id_predicted_target_final),
 
         .PC_out(id_PC),
-        .instruction_out(id_instruction)
+        .instruction_out(id_instruction),
+        .predict_taken_out(id_predict_taken),
+        .predicted_target_out(id_predicted_target)
     );
 
     /*
@@ -198,9 +236,39 @@ module cpu(
         .stall(hazard_stall)
     );
 
+    //ID stage Branch Misprediction Detection
+    logic id_mispredict;
+    logic [31:0] id_recovery_target;
+
+    always_comb begin : MispredictDetection
+        id_mispredict = 1'b0;
+        id_recovery_target = 32'b0;
+
+        if(id_branch | id_jump) begin
+            if(id_pc_source && ~id_predict_taken) begin //Predictor incorrect: said don't take
+                id_mispredict = 1'b1;
+                id_recovery_target = id_branch_target;
+            end
+            else if(~id_pc_source && id_predict_taken) begin //Predictor incorrect: said take
+                id_mispredict = 1'b1;
+                id_recovery_target = id_PC + 4;
+            end
+            else if(id_pc_source && id_predict_taken && id_predicted_target != id_branch_target) begin //Predictor said take but predicted wrong target
+                id_mispredict = 1'b1;
+                id_recovery_target = id_branch_target;
+            end
+        end
+        else begin
+            if(id_predict_taken) begin //Predictor incorrect: said take but it's not a branch
+                id_mispredict = 1'b1;
+                id_recovery_target = id_PC + 4;
+            end
+        end
+    end
+
     //Flush logic for control hazards (branches/jumps)
     logic if_flush;
-    assign if_flush = id_pc_source & ~hazard_stall;
+    assign if_flush = id_mispredict & ~hazard_stall;
 
 
     //ID --> EX pipeline register
