@@ -15,8 +15,6 @@ module branch_predictor_tb;
 
     //Debug
     logic [3:0] test_num = 0;
-    logic expected_predict_taken;
-    logic [31:0] expected_predicted_target;
 
     branch_predictor dut(
         .clk(clk),
@@ -49,89 +47,87 @@ module branch_predictor_tb;
 
         $display("\n--> Test 0: Initial state");
         test_num = 0;
-        expected_predict_taken = 1'b0;
-        expected_predicted_target = 32'b0;
-        #0.1;
-        assert (predict_taken === expected_predict_taken) else $error("Test Failed: Initial predict_taken incorrect. Expected %b, got %b", expected_predict_taken, predict_taken);
+        if_pc = 32'h00001000; // Read Port looks at this address
+        #1;
+        assert (predict_taken == 1'b0) else $error("Test Failed: Initial predict_taken incorrect. Expected 0, got %b", predict_taken);
+        assert (predicted_target == 32'b0) else $error("Test Failed: Initial predicted_target incorrect. Expected 0x00000000, got 0x%h", predicted_target);
         $display("Test 0 done.");
 
         $display("\n--> Test 1: After First Taken Branch");
         test_num = 1;
         @(posedge clk);
+        #1;
         id_is_branch = 1'b1;
         id_pc = 32'h00001000;
         id_actual_taken = 1'b1;
         id_actual_target = 32'h00001040;
         
         @(posedge clk);
+        #1;
         id_is_branch = 1'b0;
-        #0.1;
         
-        expected_predict_taken = 1'b1;
-        expected_predicted_target = 32'h00001040;
-        assert (predict_taken === expected_predict_taken) else $error("Test Failed: After first taken branch, predict_taken incorrect. Expected %b, got %b", expected_predict_taken, predict_taken);
-        assert (predicted_target === expected_predicted_target) else $error("Test Failed: After first taken branch, predicted_target incorrect. Expected 0x%h, got 0x%h", expected_predicted_target, predicted_target);
+        assert (predict_taken == 1'b1) else $error("Test Failed: After first taken branch, predict_taken incorrect. Expected 1, got %b", predict_taken);
+        assert (predicted_target == 32'h00001040) else $error("Test Failed: After first taken branch, predicted_target incorrect. Expected 0x00001040, got 0x%h", predicted_target);
         $display("Test 1 done.");
 
         $display("\n--> Test 2: After Second Taken Branch");
         test_num = 2;
         @(posedge clk);
+        #1;
         id_is_branch = 1'b1;
         id_pc = 32'h00001000;
         id_actual_taken = 1'b1;
         id_actual_target = 32'h00001040;
 
         @(posedge clk);
+        #1;
         id_is_branch = 1'b0;
-        #0.1;
-
-        expected_predict_taken = 1'b1;
-        expected_predicted_target = 32'h00001040;
-        assert (predict_taken === expected_predict_taken) else $error("Test Failed: After second taken branch, predict_taken incorrect. Expected %b, got %b", expected_predict_taken, predict_taken);
-        assert (predicted_target === expected_predicted_target) else $error("Test Failed: After second taken branch, predicted_target incorrect. Expected 0x%h, got 0x%h", expected_predicted_target, predicted_target);
+        
+        assert (predict_taken == 1'b1) else $error("Test Failed: After second taken branch, predict_taken incorrect. Expected 1, got %b", predict_taken);
+        assert (predicted_target == 32'h00001040) else $error("Test Failed: After second taken branch, predicted_target incorrect. Expected 0x00001040, got 0x%h", predicted_target);
         $display("Test 2 done.");
 
-        $display("--> Test 3: Branch Not Taken (BHT -> 10)");
+        $display("\n--> Test 3: Branch Not Taken");
         test_num = 3;
         @(posedge clk);
+        #1;
         id_is_branch = 1'b1;
         id_pc = 32'h00001000;
         id_actual_taken = 1'b0;
         id_actual_target = 32'h00001040;
         
         @(posedge clk);
+        #1;
         id_is_branch = 1'b0;
-        #0.1;
         
-        expected_predict_taken = 1'b1;
-        expected_predicted_target = 32'h00001040;
-        assert (predict_taken === expected_predict_taken && predicted_target === expected_predicted_target) else $error("Test Failed: Weakly Taken recovery incorrect. Expected Taken: %b, Target: %0h, Got Taken: %b, Target: %0h", expected_predict_taken, expected_predicted_target, predict_taken, predicted_target);
+        assert (predict_taken == 1'b0) else $error("Test Failed: After branch not taken, predict_taken incorrect. Expected 0, got %b", predict_taken);
+        assert (predicted_target == 32'h00001040) else $error("Test Failed: After branch not taken, predicted_target incorrect. Expected 0x00001040, got 0x%h", predicted_target);
         $display("Test 3 done.");
 
-        $display("--> Test 4: Second Branch Not Taken (BHT -> 01)");
+        $display("\n--> Test 4: Second Branch Not Taken");
         test_num = 4;
         @(posedge clk);
+        #1;
         id_is_branch = 1'b1;
         id_pc = 32'h00001000;
         id_actual_taken = 1'b0;
         id_actual_target = 32'h00001040;
         
         @(posedge clk);
+        #1;
         id_is_branch = 1'b0;
-        #0.1;
         
-        expected_predict_taken = 1'b0;
-        expected_predicted_target = 32'h00001040;
-        assert (predict_taken === expected_predict_taken && predicted_target === expected_predicted_target) else $error("Test Failed: Weakly Not Taken state incorrect. Expected Taken: %b, Target: %0h, Got Taken: %b, Target: %0h", expected_predict_taken, expected_predicted_target, predict_taken, predicted_target);
+        assert (predict_taken == 1'b0) else $error("Test Failed: After second branch not taken, predict_taken incorrect. Expected 0, got %b", predict_taken);
+        assert (predicted_target == 32'h00001040) else $error("Test Failed: After second branch not taken, predicted_target incorrect. Expected 0x00001040, got 0x%h", predicted_target);
         $display("Test 4 done.");
 
-        $display("--> Test 5: Different Instruction PC Check");
+
+        $display("\n--> Test 5: Different Instruction PC Check");
         test_num = 5;
         if_pc = 32'h00002000;
-        expected_predict_taken = 1'b0;
-        expected_predicted_target = 32'b0;
-        #0.1;
-        assert (predict_taken === expected_predict_taken && predicted_target === expected_predicted_target) else $error("Test Failed: PC Tag matching failed. Expected Taken: %b, Target: %0h, Got Taken: %b, Target: %0h", expected_predict_taken, expected_predicted_target, predict_taken, predicted_target);
+        #1;
+        assert (predict_taken == 1'b0) else $error("Test Failed: Different PC check, predict_taken incorrect. Expected 0, got %b", predict_taken);
+        assert (predicted_target == 32'b0) else $error("Test Failed: Different PC check, predicted_target incorrect. Expected 0x00000000, got 0x%h", predicted_target);
         $display("Test 5 done.");
 
 

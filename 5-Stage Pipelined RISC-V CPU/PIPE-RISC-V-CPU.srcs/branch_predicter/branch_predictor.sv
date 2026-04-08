@@ -9,10 +9,10 @@ module branch_predictor (
     input logic id_is_branch,
     input logic [31:0] id_pc,
     input logic id_actual_taken,
-    input logic [31:0] id_actual_target
+    input logic [31:0] id_actual_target,
 
     output logic predict_taken,
-    output logic [31:0] predicted_target,
+    output logic [31:0] predicted_target
     );
 
     logic [31:0] btb_targets [63:0]; // 64-entry Branch Target Buffer
