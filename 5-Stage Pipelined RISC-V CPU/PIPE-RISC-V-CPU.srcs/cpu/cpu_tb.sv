@@ -274,9 +274,15 @@ module cpu_tb;
         $display("Test %0d Complete\n", test_num);
 
         test_num = 39;
+        $display("\n--> Test %0d: Branch Predictor Loop Training", test_num);
+        repeat(14) @(posedge clk); #0.1; 
+        assert(dut.registers.reg_array[30] == 32'd0) else $error("Test %0d Failed: Loop did not terminate successfully.", test_num);
+        $display("Test %0d Complete\n", test_num);
+
+        test_num = 40;
         $display("\n--> Test %0d: Final Execution Survival Check", test_num);
         @(posedge clk); #0.1; //ADDI x31, x0, 99
-        assert(dut.registers.reg_array[31] == 32'd99) else $error("Test %0d Failed", test_num);
+        assert(dut.registers.reg_array[31] == 32'd99) else $error("Test %0d Failed: CPU did not survive loop exit.", test_num);
         $display("Test %0d Complete\n", test_num);
 
         test_num = 0;

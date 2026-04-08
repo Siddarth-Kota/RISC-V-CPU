@@ -14,7 +14,7 @@ package debug_pkg;
         func3 = inst[14:12];
 
         case(opcode)
-            7'b1100011: begin
+            7'b1100011: begin //B-type
                 case(func3)
                     FUNC3_BEQ: return "BEQ";
                     FUNC3_BNE: return "BNE";
@@ -27,10 +27,10 @@ package debug_pkg;
             end
             OPCODE_J_TYPE: return "JAL";
             OPCODE_J_TYPE_JALR: return "JALR";
-            OPCODE_I_TYPE: return "LOAD";
-            OPCODE_S_TYPE: return "STORE";
-            OPCODE_I_TYPE_ALU: return "I-ARITH";
-            OPCODE_R_TYPE: return "R-ARITH";
+            OPCODE_I_TYPE: return "I-TYPE";
+            OPCODE_S_TYPE: return "S-TYPE";
+            OPCODE_I_TYPE_ALU: return "I-ALU";
+            OPCODE_R_TYPE: return "R-TYPE";
             OPCODE_U_TYPE_LUI: return "LUI";
             OPCODE_U_TYPE_AUIPC: return "AUIPC";
             default: return "UNKNOWN";

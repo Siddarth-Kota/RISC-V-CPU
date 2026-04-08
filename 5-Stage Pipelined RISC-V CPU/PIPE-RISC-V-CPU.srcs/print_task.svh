@@ -1,24 +1,27 @@
 task printPipeline();
     begin
         string if_str, id_str, ex_str, mem_str, wb_str;
-        string if_name, id_name;
+        string if_name, id_name, ex_name, mem_name, wb_name;
         
-        if_str  = (dut.if_instruction === 32'h00000013 || dut.if_instruction === 32'bx) ? "NOP   " : "ACTIVE";
-        id_str  = (dut.id_instruction === 32'h00000013 || dut.id_instruction === 32'bx) ? "NOP   " : "ACTIVE";
-        ex_str  = (inst_EX === 32'h00000013 || inst_EX === 32'bx) ? "NOP   " : "ACTIVE";
-        mem_str = (inst_MEM === 32'h00000013 || inst_MEM === 32'bx) ? "NOP   " : "ACTIVE";
-        wb_str  = (inst_WB === 32'h00000013 || inst_WB === 32'bx) ? "NOP   " : "ACTIVE";
+        if_str  = (dut.if_instruction === 32'h00000013 || dut.if_instruction === 32'bx) ? "NOP" : "ACTIVE";
+        id_str  = (dut.id_instruction === 32'h00000013 || dut.id_instruction === 32'bx) ? "NOP" : "ACTIVE";
+        ex_str  = (inst_EX === 32'h00000013 || inst_EX === 32'bx) ? "NOP" : "ACTIVE";
+        mem_str = (inst_MEM === 32'h00000013 || inst_MEM === 32'bx) ? "NOP" : "ACTIVE";
+        wb_str  = (inst_WB === 32'h00000013 || inst_WB === 32'bx) ? "NOP" : "ACTIVE";
 
         if_name = get_inst_name(dut.if_instruction);
         id_name = get_inst_name(dut.id_instruction);
+        ex_name = get_inst_name(inst_EX);
+        mem_name = get_inst_name(inst_MEM);
+        wb_name = get_inst_name(inst_WB);
 
         $display("\n---------------------------------------------------------------------------------------------------");
         $display("Time: %0t | Clock Cycles: %0d" , $time, $time/10 + 1);
-        $display("IF  | PC = 0x%08h | Hex: 0x%08h --> [%s]", dut.if_PC, dut.if_instruction, if_str);
-        $display("ID  | PC = 0x%08h | Hex: 0x%08h --> [%s] | rs1=0x%02d rs2=0x%02d rd=0x%02d imm=0x%08h", dut.id_PC, dut.id_instruction, id_str, dut.id_rs1, dut.id_rs2, dut.id_rd, dut.id_immediate);
-        $display("EX  | PC = 0x%08h | Hex: 0x%08h --> [%s] | alu_result = 0x%08h", pc_EX, inst_EX, ex_str, dut.ex_alu_result);
-        $display("MEM | PC = 0x%08h | Hex: 0x%08h --> [%s] | alu_pass/address = 0x%08h | write_data = 0x%08h | read_data = 0x%08h", pc_MEM, inst_MEM, mem_str, dut.mem_alu_result, dut.mem_write_data, dut.mem_read_wb_data);    
-        $display("WB  | PC = 0x%08h | Hex: 0x%08h --> [%s] | reg_write_data = 0x%08h", pc_WB, inst_WB, wb_str, dut.wb_write_data_final);
+        $display("IF  | PC = 0x%08h | Hex: 0x%08h --> [%6s] | [%6s] |", dut.if_PC, dut.if_instruction, if_str, if_name);
+        $display("ID  | PC = 0x%08h | Hex: 0x%08h --> [%6s] | [%6s] | rs1=0x%02d rs2=0x%02d rd=0x%02d imm=0x%08h", dut.id_PC, dut.id_instruction, id_str, id_name, dut.id_rs1, dut.id_rs2, dut.id_rd, dut.id_immediate);
+        $display("EX  | PC = 0x%08h | Hex: 0x%08h --> [%6s] | [%6s] | alu_result = 0x%08h", pc_EX, inst_EX, ex_str, ex_name, dut.ex_alu_result);
+        $display("MEM | PC = 0x%08h | Hex: 0x%08h --> [%6s] | [%6s] | alu_pass/address = 0x%08h | write_data = 0x%08h | read_data = 0x%08h", pc_MEM, inst_MEM, mem_str, mem_name, dut.mem_alu_result, dut.mem_write_data, dut.mem_read_wb_data);    
+        $display("WB  | PC = 0x%08h | Hex: 0x%08h --> [%6s] | [%6s] | reg_write_data = 0x%08h", pc_WB, inst_WB, wb_str, wb_name, dut.wb_write_data_final);
         
         if (dut.hazard_stall) begin
             if (dut.hazard_detection_unit.load_use_stall) begin
@@ -51,7 +54,7 @@ task printPipeline();
             end
         end
 
-        if ((dut.id_branch || dut.id_jump) && id_str == "ACTIVE") begin
+        if ((dut.id_branch || dut.id_jump) && id_str == "ACTIVE" && !dut.hazard_stall) begin
             if (dut.id_mispredict) begin
                 $display(" >>> RESOLUTION (ID): MISPREDICT on %s [PC: 0x%08h]! Guessed %s, but actual is %s. Flushing IF and recovering PC to 0x%08h", 
                     id_name, dut.id_PC,

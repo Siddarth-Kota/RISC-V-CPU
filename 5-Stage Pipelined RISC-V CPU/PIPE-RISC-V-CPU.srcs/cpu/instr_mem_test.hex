@@ -53,5 +53,10 @@ FFF1C313  // 0x14: XORI  x6, x3, -1       | x6 <= 0  (-1 ^ -1)
 00800DEF  // 0xAC: JAL   x27, 8           | x27 <= 0xB0. Flushes next, Jumps to 0xB4
 06500E93  // 0xB0: ADDI  x29, x0, 101     | x29 <= 101 [WILL BE FLUSHED]
 008D8E67  // 0xB4: JALR  x28, x27, 8      | Target = 0xB0+8. Jumps to 0xBC
-06500E93  // 0xB8: ADDI  x29, x0, 101     | x29 <= 101 [WILL BE FLUSHED]
-06300F93  // 0xBC: ADDI  x31, x0, 99      | x31 <= 99
+
+//Branch Prediction Tests
+00300F13  // 0xB8: ADDI x30, x0, 3        | x30 <= 3 
+FFFF0F13  // 0xBC: ADDI x30, x30, -1      | x30 <= x30 - 1 (Loop Start)
+FE0F1EE3  // 0xC0: BNE  x30, x0, -4       | If x30 != 0, Branch back to 0xBC
+
+06300F93  // 0xC4: ADDI x31, x0, 99       | x31 <= 99 (Final Survival Check)
