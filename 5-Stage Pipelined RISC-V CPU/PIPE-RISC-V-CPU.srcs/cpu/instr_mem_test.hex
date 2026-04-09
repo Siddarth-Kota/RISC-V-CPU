@@ -36,7 +36,7 @@ FFF1C313  // 0x14: XORI  x6, x3, -1       | x6 <= 0  (-1 ^ -1)
 00804D03  // 0x70: LBU   x26, 8(x0)       | x26 <= 0x000000FF (Zero Ext)
 
 //B-Type Branch, J-Type Jump, I-Type Jump Instructions
-00418463  // 0x74: BEQ   x3, x4, 8        | (15 == 1 -> FALSE). Branch not taken
+00418463  // 0x74: BEQ   x3, x4, 8        | (-1 == 1 -> FALSE). Branch not taken
 04D00E93  // 0x78: ADDI  x29, x0, 77      | x29 <= 77. [WILL NOT BE FLUSHED]
 01618463  // 0x7C: BEQ   x3, x22, 8       | (-1 == -1) -> Flushes next, Jumps to 0x84
 06500E93  // 0x80: ADDI  x29, x0, 101     | x29 <= 101 [WILL BE FLUSHED]
@@ -52,7 +52,7 @@ FFF1C313  // 0x14: XORI  x6, x3, -1       | x6 <= 0  (-1 ^ -1)
 06500E93  // 0xA8: ADDI  x29, x0, 101     | x29 <= 101 [WILL BE FLUSHED]
 00800DEF  // 0xAC: JAL   x27, 8           | x27 <= 0xB0. Flushes next, Jumps to 0xB4
 06500E93  // 0xB0: ADDI  x29, x0, 101     | x29 <= 101 [WILL BE FLUSHED]
-008D8E67  // 0xB4: JALR  x28, x27, 8      | Target = 0xB0+8. Jumps to 0xBC
+008D8E67  // 0xB4: JALR  x28, 8(x27)      | x28 <= 0xB0+8. Jumps to 0xB8
 
 //Branch Prediction Tests
 00300F13  // 0xB8: ADDI x30, x0, 3        | x30 <= 3 
