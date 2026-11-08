@@ -1,0 +1,10 @@
+build/
+xcelium.d/
+*.vcd
+*.shm/
+core.*
+*.svf
+*.pvl
+*.syn
+*.mr
+__pycache__/
