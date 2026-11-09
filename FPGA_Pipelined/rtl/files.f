@@ -1,15 +1,9 @@
 rtl/packages/signal_pkg.sv
 rtl/ALU/ALU.sv
-rtl/PipeRegisters/ex_mem_reg.sv
-rtl/PipeRegisters/id_ex_reg.sv
-rtl/PipeRegisters/if_id_reg.sv
-rtl/PipeRegisters/mem_wb_reg.sv
 rtl/be_decoder/be_decoder.sv
 rtl/branch_predicter/branch_predictor.sv
 rtl/control/control.sv
-rtl/forwarding/forwarding.sv
 rtl/hazard_detection/hazard_detection.sv
-rtl/memory/memory.sv
 rtl/reader/reader.sv
 rtl/registers/registers.sv
 rtl/signextender/signextender.sv

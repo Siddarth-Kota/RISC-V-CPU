@@ -1,21 +1,21 @@
 `timescale 1ns / 1ps
-// One request at a time. SRAM accepts EN at edge N; its output is captured at
-// N+1, after a full clock period of access time, then retained until consumed.
+
 module sram_port (
     input logic clk, rst_n,
     input logic req_valid,
-    output logic req_ready,
     input logic [31:0] req_addr, req_wdata,
     input logic req_write,
     input logic [3:0] req_be,
-    output logic rsp_valid,
     input logic rsp_ready,
+    input logic [31:0] sram_rdata,
+
+    output logic req_ready,
+    output logic rsp_valid,
     output logic [31:0] rsp_data,
     output logic busy,
     output logic sram_en, sram_read,
     output logic [9:0] sram_addr,
-    output logic [31:0] sram_wdata, sram_ben,
-    input logic [31:0] sram_rdata
+    output logic [31:0] sram_wdata, sram_ben
 );
     logic access_pending;
     assign busy = access_pending || rsp_valid;
@@ -24,9 +24,11 @@ module sram_port (
     assign sram_read = !req_write;
     assign sram_addr = req_addr[11:2];
     assign sram_wdata = req_wdata;
+
     for (genvar lane = 0; lane < 4; lane++) begin : byte_lanes
         assign sram_ben[lane*8 +: 8] = {8{req_be[lane]}};
     end
+
     always_ff @(posedge clk) begin
         if (!rst_n) begin
             access_pending <= 0;

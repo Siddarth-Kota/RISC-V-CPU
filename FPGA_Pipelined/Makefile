@@ -25,8 +25,8 @@ endif
 MAKE_PROGRAM := $(MAKE)
 shquote = '$(subst ','"'"',$(1))'
 
-UNIT_TOPS := ALU_tb PipeRegister_tb be_decoder_tb branch_predictor_tb control_tb \
-             forwarding_unit_tb hazard_detection_tb memory_tb reader_tb registers_tb signextender_tb
+UNIT_TOPS := ALU_tb be_decoder_tb branch_predictor_tb control_tb \
+             hazard_detection_tb reader_tb registers_tb signextender_tb
 PROGRAMS := instr_mem_test directed random
 MEMORY_MODES := fast sync delayed
 PREFETCH_MODES := 0 1
@@ -43,7 +43,7 @@ MEM_delayed := +imem_delay=7 +dmem_delay=19 +backpressure=1
 help:
 	@printf '%s\n' \
 	  'make prepare  Generate workloads and source manifests; no simulator runs.' \
-	  'make units    Run the 11 module benches.' \
+	  'make units    Run the $(words $(UNIT_TOPS)) active module benches.' \
 	  'make cpu      Run 18 CPU cases: 3 programs x 3 memory modes x prefetch off/on.' \
 	  'make sram     Run the SRAM adapter and system benches.' \
 	  'make all      Run all suites, stopping at the first failure.' \
@@ -67,6 +67,9 @@ prepare:
 	out="$$(cd -- "$(BUILD_DIR)" && pwd -P)"
 	programs="$$out/inputs/programs"
 	manifests="$$out/inputs/manifests"
+	# Remove obsolete shared inputs from earlier layouts; saved runs stay untouched.
+	rm -f -- "$$manifests/PipeRegister_tb.f" "$$manifests/forwarding_unit_tb.f" \
+	  "$$manifests/memory_tb.f" "$$programs/data_mem_test.hex"
 	# Keep a preparation record even when no simulation is requested.
 	{
 	    printf '# Prepared at %s (UTC)\n' "$$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -80,15 +83,14 @@ prepare:
 	    shift
 	    while IFS= read -r source || [[ -n "$$source" ]]; do
 	        [[ -z "$$source" || "$$source" == \#* ]] && continue
+	        [[ -f "$$root/$$source" ]] || { echo "Missing RTL source: $$source" >&2; return 1; }
 	        printf '"%s/%s"\n' "$$root" "$$source"
 	    done < "$$root/rtl/files.f" > "$$dest"
 	    for source in "$$@"; do printf '"%s"\n' "$$source"; done >> "$$dest"
 	}
 	manifest "$$manifests/core.f" "$$root/sim/support/latency_memory.sv" "$$root/sim/tb/cpu_tb.sv"
 	for top in $(UNIT_TOPS); do
-	    bench="$$top"
-	    [[ "$$top" == forwarding_unit_tb ]] && bench=forwarding_tb
-	    manifest "$$manifests/$$top.f" "$$root/sim/tb/$$bench.sv"
+	    manifest "$$manifests/$$top.f" "$$root/sim/tb/$$top.sv"
 	done
 	manifest "$$manifests/sram.f"
 	while IFS= read -r source || [[ -n "$$source" ]]; do

@@ -4,8 +4,8 @@ module control(
     input logic [6:0] op,
     input logic [2:0] func3,
     input logic [6:0] func7,
-    input logic alu_zero,
-    input logic alu_last_bit,
+    input logic op_equal,
+    input logic op1_lt_op2,
 
     output logic [3:0] alu_control,
     output logic [2:0] imm_source,
@@ -163,10 +163,10 @@ module control(
     logic assert_branch;
     always_comb begin : branch_logic_decode
         case(func3)
-            FUNC3_BEQ: assert_branch = branch & alu_zero;
-            FUNC3_BNE: assert_branch = branch & ~alu_zero;
-            FUNC3_BLT, FUNC3_BLTU: assert_branch = alu_last_bit & branch;
-            FUNC3_BGE, FUNC3_BGEU: assert_branch = ~alu_last_bit & branch;
+            FUNC3_BEQ: assert_branch = branch & op_equal;
+            FUNC3_BNE: assert_branch = branch & ~op_equal;
+            FUNC3_BLT, FUNC3_BLTU: assert_branch = op1_lt_op2 & branch;
+            FUNC3_BGE, FUNC3_BGEU: assert_branch = ~op1_lt_op2 & branch;
             default: assert_branch = 1'b0;
         endcase
     end

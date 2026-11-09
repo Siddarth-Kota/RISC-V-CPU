@@ -1,6 +1,5 @@
 `timescale 1ns / 1ps
-// Local functional substitute for the technology macro. This is NOT a vendor
-// timing model. Compile either this file OR the vendor views, never both.
+
 module CF_SRAM_1024x32 (
     output logic [31:0] DO,
     output wire ScanOutCC,

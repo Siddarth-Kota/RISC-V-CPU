@@ -1,5 +1,5 @@
 `timescale 1ns / 1ps
-// Technology binding only. Vendor HDL, Liberty/DB and LEF stay in the local PDK.
+
 module cf_sram (
     input logic clk, en, read_enable,
     input logic [9:0] addr,

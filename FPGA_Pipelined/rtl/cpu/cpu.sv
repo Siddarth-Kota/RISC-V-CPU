@@ -1,8 +1,6 @@
 `timescale 1ns / 1ps
 `default_nettype none // Require explicit signal declarations to catch typos.
 
-// Five-stage, in-order RV32I datapath. Memory is external and each port permits
-// one accepted request until its registered response has been consumed.
 module cpu #(
     parameter bit PREDICT = 1'b1,
     parameter bit PREFETCH = 1'b0
@@ -91,7 +89,7 @@ module cpu #(
     logic [3:0] alu_control;
     logic mem_write, reg_write, alu_source, pc_source, branch, jump;
     logic [1:0] wb_source, target_source;
-    logic compare_less, hazard_stall, id_fire, redirect, mispredict;
+    logic op1_lt_op2, hazard_stall, id_fire, redirect, mispredict;
     logic [31:0] recovery_pc;
     logic [31:0] ex_a, ex_b, ex_result, store_data;
     logic [3:0] byte_enable;
@@ -187,11 +185,11 @@ module cpu #(
         .raw_src(id.instruction[31:7]), .imm_source(imm_source), .immediate(id_imm)
     );
 
-    assign compare_less = (id.instruction[14:12] == FUNC3_BLTU || id.instruction[14:12] == FUNC3_BGEU) ? (id_a < id_b) : ($signed(id_a) < $signed(id_b));
+    assign op1_lt_op2 = (id.instruction[14:12] == FUNC3_BLTU || id.instruction[14:12] == FUNC3_BGEU) ? (id_a < id_b) : ($signed(id_a) < $signed(id_b));
 
     control control_unit (
         .op(id.instruction[6:0]), .func3(id.instruction[14:12]), .func7(id.instruction[31:25]),
-        .alu_zero(id_a == id_b), .alu_last_bit(compare_less),
+        .op_equal(id_a == id_b), .op1_lt_op2(op1_lt_op2),
         .alu_control(alu_control), .imm_source(imm_source), .mem_write(mem_write),
         .reg_write(reg_write), .alu_source(alu_source), .write_back_source(wb_source),
         .pc_source(pc_source), .second_add_source(target_source), .branch(branch), .jump(jump)
