@@ -1,14 +1,7 @@
-# Run with source from Design Compiler after loading your lab setup.
-# Reads the current RTL for analysis only.
-set project_dir [file dirname [file dirname [file normalize [info script]]]]
-set file_list [open [file join $project_dir rtl files.f] r]
-set rtl_files {}
-foreach entry [split [read $file_list] "\n"] {
-    set entry [string trim $entry]
-    if {$entry ne ""} {
-        lappend rtl_files [file join $project_dir $entry]
-    }
+# Source inside Design Compiler. Core package first; optional SRAM-system RTL
+# follows. No testbench, functional memory model, or vendor simulation HDL.
+if {![llength [info commands ::synthcfg::rtl_sources]]} {
+    source [file join [file dirname [info script]] config.tcl]
 }
-close $file_list
-
-analyze -format sverilog $rtl_files
+set rtl_files [synthcfg::rtl_sources]
+if {![analyze -format sverilog $rtl_files]} { error "RTL analysis failed" }

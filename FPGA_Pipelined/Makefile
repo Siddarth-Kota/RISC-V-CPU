@@ -1,5 +1,5 @@
 # Run from this project directory after sourcing the lab's Cadence setup.
-# Plain `make` prints help; simulation requires an explicit target.
+# Plain `make` prints help; simulation and synthesis require explicit targets.
 SHELL := /bin/bash
 .SHELLFLAGS := -eu -o pipefail -c
 .ONESHELL:
@@ -16,6 +16,18 @@ SIM_TIMEOUT ?= 240
 VCD ?= 0
 SRAM_MODEL ?= functional
 SRAM_ROOT ?=
+TCLSH ?= tclsh
+DC_SHELL ?= dc_shell
+SYNTH_BUILD_DIR ?= build/synth
+SYNTH_RUN_DIR ?= $(SYNTH_BUILD_DIR)/latest
+# Defaults live in synth/config.tcl; supplied Make variables override them.
+SYNTH_SETTINGS := SYNTH_LAB_ROOT SYNTH_TOP SYNTH_PREDICT SYNTH_PREFETCH SYNTH_PERIOD_NS \
+                  SYNTH_STD_DB SYNTH_STD_LIB SYNTH_STD_OPCOND SYNTH_SRAM_DB SYNTH_SRAM_LIB \
+                  SYNTH_COMPILE_MODE SYNTH_MAX_CORES SYNTH_SETUP_UNCERTAINTY_NS \
+                  SYNTH_HOLD_UNCERTAINTY_NS SYNTH_CLOCK_TRANSITION_NS \
+                  SYNTH_INPUT_DELAY_MAX_NS SYNTH_INPUT_DELAY_MIN_NS \
+                  SYNTH_OUTPUT_DELAY_MAX_NS SYNTH_OUTPUT_DELAY_MIN_NS \
+                  SYNTH_DRIVING_CELL SYNTH_OUTPUT_LOAD_PF
 # One ID per make invocation. Refuse an existing ID so old results stay intact.
 ifeq ($(origin RUN_ID),undefined)
 RUN_ID := $(shell date -u +%Y%m%dT%H%M%SZ)-$(shell echo $$$$)
@@ -50,6 +62,14 @@ help:
 	  'make cpu-directed-delayed-pf1 VCD=1  Run one case with waveforms.' \
 	  'make sram SRAM_MODEL=vendor SRAM_ROOT=/path/to/CF_SRAM_1024x32' \
 	  'make -n cpu   Preview commands without running them.' \
+	  'make synth-check    Validate synthesis configuration/paths without DC.' \
+	  'make synth-prepare  Snapshot inputs and record a DC command; no DC runs.' \
+	  'make synth          Prepare a fresh run and run Design Compiler.' \
+	  'make synth-run      Run the latest prepared snapshot (load Synopsys setup.csh first).' \
+	  'make synth-summary  Recover summary from existing reports; no DC runs.' \
+	  'make synth SYNTH_PERIOD_NS=10 RUN_ID=tt-10ns  Run a new clock experiment.' \
+	  'Synthesis defaults: cpu_sram_system, TT, 20 ns, PREDICT=1, PREFETCH=0.' \
+	  'Synthesis run layout and assumptions: synth/README.md.' \
 	  '' \
 	  'First enter tcsh and source /tools/software/cadence/setup.csh.' \
 	  'Options: BUILD_DIR, RUN_ID, PYTHON, XRUN, XRUN_FLAGS, SEED, SIM_TIMEOUT (seconds), VCD=1.' \
@@ -209,3 +229,53 @@ $(TESTS): session
 	printf 'PASS\t%s\t%s\t%s\n' "$$name" "$$status" "$$elapsed" >> "$$run/results.tsv"
 	printf 'PASS %s\n' "$$name"
 	grep '^PASS ' "$$case_dir/logs/console.log" || true
+
+# Synthesis uses separate run directories and never depends on simulation targets.
+.PHONY: synth-check synth-prepare synth-run synth-summary synth
+synth-check:
+	@env $(foreach v,$(SYNTH_SETTINGS),$(if $(filter undefined,$(origin $(v))),,$(call shquote,$(v)=$($(v))))) \
+	  "$(TCLSH)" synth/check_setup.tcl
+
+synth-prepare:
+	@env $(foreach v,$(SYNTH_SETTINGS),$(if $(filter undefined,$(origin $(v))),,$(call shquote,$(v)=$($(v))))) \
+	  "$(TCLSH)" synth/prepare.tcl "$(SYNTH_BUILD_DIR)" $(call shquote,$(RUN_ID))
+	root="$$(pwd -P)"
+	run="$$(cd -- "$(SYNTH_BUILD_DIR)/runs/$(RUN_ID)" && pwd -P)"
+	tool="$$(command -v "$(DC_SHELL)" || true)"
+	if [[ -z "$$tool" ]]; then tool=$(call shquote,$(DC_SHELL));
+	elif [[ "$$tool" != /* ]]; then tool="$$root/$$tool"; fi
+	printf '%s\n' "$$tool" > "$$run/dc_tool.txt"
+	command=("$$tool" -f "$$run/inputs/synth/run_synth.tcl")
+	{
+	    printf '#!/usr/bin/env bash\nset -euo pipefail\n# Load the Synopsys lab environment before executing.\ncd -- %q\n' "$$run/work"
+	    printf '%q ' "$${command[@]}"; printf '\n'
+	} > "$$run/command.sh"
+	{
+	    printf 'Project: %s\nMake goals: %s\nMake flags: %s\n' "$$root" $(call shquote,$(MAKECMDGOALS)) $(call shquote,$(MAKEFLAGS))
+	    printf 'Design Compiler argv: '; printf '%q ' "$${command[@]}"; printf '\n'
+	    printf 'Effective synthesis settings: configuration.txt and resolved_config.tcl\n'
+	} > "$$run/invocation.txt"
+	printf 'DC command recorded in %s/command.sh\n' "$$run"
+
+synth: SYNTH_RUN_DIR = $(SYNTH_BUILD_DIR)/runs/$(RUN_ID)
+synth: synth-prepare synth-run
+
+synth-run:
+	@run="$$(cd -- "$(SYNTH_RUN_DIR)" && pwd -P)"
+	tool="$$(cat "$$run/dc_tool.txt")"
+	command -v "$$tool" >/dev/null || { echo 'Load /tools/software/synopsys/setup.csh in tcsh first.' >&2; exit 1; }
+	[[ "$$(cat "$$run/status.txt")" == PREPARED ]] || { echo 'This run has already started; prepare a new RUN_ID.' >&2; exit 1; }
+	status=0
+	bash "$$run/command.sh" 2>&1 | tee "$$run/logs/console.log" || status=$$?
+	if [[ "$$status" != 0 ]] || [[ "$$(cat "$$run/status.txt")" != COMPLETED ]] \
+	  || grep -Eq '^[[:space:]]*(Error:|Fatal:|SYNTHESIS_FAILED:)' "$$run/logs/console.log"; then
+	    printf 'FAILED\n' > "$$run/status.txt"
+	    printf 'Synthesis failed; inspect %s/logs/console.log\n' "$$run" >&2
+	    exit 1
+	fi
+	printf 'Synthesis flow completed. Review timing/constraints; this does not establish timing closure.\n'
+	cat "$$run/reports/summary.tsv"
+
+# Reporting-only recovery preserves the original status, snapshots and outputs.
+synth-summary:
+	@"$(TCLSH)" synth/summarize.tcl "$(SYNTH_RUN_DIR)"
