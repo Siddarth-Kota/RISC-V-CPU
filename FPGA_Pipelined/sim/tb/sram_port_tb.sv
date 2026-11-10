@@ -21,13 +21,20 @@ module sram_port_tb;
     cf_sram ram (.clk(clk), .en(en), .read_enable(read_enable), .addr(addr), .wdata(wdata), .ben(ben), .rdata(rdata));
     always @(posedge clk) if (rst_n && en) enables++;
     assert property (@(posedge clk) disable iff (!rst_n) rsp_valid && !rsp_ready |=> rsp_valid && $stable(rsp_data));
-    assert property (@(posedge clk) disable iff (!rst_n) busy |-> !req_ready && !en);
+    assert property (@(posedge clk) disable iff (!rst_n) busy |-> !req_ready);
+    // SRAM access follows request acceptance; it occurs while the adapter is busy.
+    assert property (@(posedge clk) disable iff (!rst_n) req_valid && req_ready |=> en && busy);
+    assert property (@(posedge clk) disable iff (!rst_n) en |=> !en);
     task automatic transaction(input bit wr, input logic [31:0] address, data, input logic [3:0] mask, input logic [31:0] expected);
         begin
             @(negedge clk);
             req_valid = 1; req_write = wr; req_addr = address; req_wdata = data; req_be = mask;
             do @(posedge clk); while (!req_ready);
-            @(negedge clk); req_valid = 0;
+            // The sender may change its payload after acceptance, before the
+            // SRAM access. Only the adapter's saved request may drive the macro.
+            #1;
+            req_valid = 0;
+            req_addr = 0; req_wdata = ~data; req_write = !wr; req_be = ~mask;
             wait (rsp_valid);
             // A returned response must survive arbitrary response backpressure.
             repeat (5) @(negedge clk);

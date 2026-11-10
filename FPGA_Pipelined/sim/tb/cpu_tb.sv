@@ -168,13 +168,17 @@ module cpu_tb;
                 for (int i = 0; i < 1024; i++)
                     if (ref_mem[i] !== dmem.mem_array[i]) $fatal(1,"Memory mismatch word %0d: %h != %h",i,ref_mem[i],dmem.mem_array[i]);
                 if (d_writes != ref_stores) $fatal(1,"Repeated/wrong-path stores: accepted=%0d retired=%0d",d_writes,ref_stores);
-                if ($test$plusargs("coverage") && (redirects_pending == 0 || data_stalls == 0 || discarded == 0))
-                    $fatal(1,"Required latency/redirect coverage missing");
+                if ($test$plusargs("coverage")) begin
+                    $display("COVERAGE prefetch=%0b redirects_pending=%0d data_stalls=%0d discarded=%0d",PREFETCH,redirects_pending,data_stalls,discarded);
+                    if (data_stalls == 0 || discarded == 0 || (PREFETCH && redirects_pending == 0))
+                        $fatal(1,"Coverage missing: require data_stalls>0, discarded>0, and redirects_pending>0 when prefetch=1; prefetch=%0b redirects_pending=%0d data_stalls=%0d discarded=%0d",PREFETCH,redirects_pending,data_stalls,discarded);
+                end
                 $display("PASS retired=%0d cycles=%0d CPI=%f stores=%0d redirects_pending=%0d discarded=%0d fetch_stalls=%0d data_stalls=%0d buffer_waits=%0d",retired,cycles,real'(cycles)/retired,d_writes,redirects_pending,discarded,fetch_stalls,data_stalls,buffer_waits);
                 $finish;
             end
         end
     endtask
+    
     always @(posedge clk) begin
         if (rst_n) begin
             cycles++;
