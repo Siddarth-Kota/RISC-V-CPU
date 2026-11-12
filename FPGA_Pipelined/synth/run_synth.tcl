@@ -68,7 +68,22 @@ namespace eval synthflow {
         set_operating_conditions $::synthcfg::std_opcond -library $::synthcfg::std_lib
         set_wire_load_mode top
         uplevel #0 [list source [file join $::synthcfg::project_dir synth constraints.sdc]]
+        
+        # Separate path groups so the reports and the optimizer see each class of path.
+        set regs_ck [all_registers -clock_pins]
+        set regs_d  [all_registers -data_pins]
+        group_path -name reg2reg -from $regs_ck     -to $regs_d
+        group_path -name in2reg  -from [all_inputs] -to $regs_d
+        group_path -name reg2out -from $regs_ck     -to [all_outputs]
+        group_path -name in2out  -from [all_inputs] -to [all_outputs]
+        if {[sizeof_collection $macros]} {
+            set sram_clk [get_pins -of_objects $macros -filter "name == CLKin"]
+            group_path -name to_sram   -to [remove_from_collection [get_pins -of_objects $macros -filter "direction == in"] $sram_clk]
+            group_path -name from_sram -from $sram_clk
+        }
+        report path_groups.rpt {report_path_group}
         set_fix_multiple_port_nets -all -buffer_constants
+
         report units.rpt {report_units}
         report standard_library.rpt [list report_lib -operating_condition $::synthcfg::std_lib]
         if {$::synthcfg::top eq "cpu_sram_system"} {
@@ -99,6 +114,11 @@ namespace eval synthflow {
         report area.rpt {report_area -hierarchy}
         report references.rpt {report_reference -hierarchy}
         report timing_setup.rpt {report_timing -delay_type max -max_paths 20 -path_type full_clock_expanded -nets -transition_time -capacitance}
+        report qor.rpt {report_qor}
+        foreach g [get_object_name [get_path_groups *]] {
+            if {$g eq "**default**"} { continue }
+            report timing_setup_${g}.rpt [list report_timing -group $g -delay_type max -max_paths 10 -path_type full_clock_expanded -nets -transition_time]
+        }
         report timing_hold.rpt {report_timing -delay_type min -max_paths 20 -path_type full_clock_expanded -nets -transition_time -capacitance}
         set clock [get_clocks $::synthcfg::clock_name]
         foreach delay_type {max min} {

@@ -93,10 +93,12 @@ prepare:
 	# Keep a preparation record even when no simulation is requested.
 	{
 	    printf '# Prepared at %s (UTC)\n' "$$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-	    printf '%q ' "$(PYTHON)" "$$root/sim/programs.py" "$$programs"; printf '\n'
+	    printf '%q ' env -u LD_LIBRARY_PATH "$(PYTHON)" "$$root/sim/programs.py" "$$programs"; printf '\n'
 	    printf '%q ' cp -- "$$root"/sim/fixtures/*.hex "$$programs/"; printf '\n'
 	} > "$$out/inputs/prepare.log"
-	"$(PYTHON)" "$$root/sim/programs.py" "$$programs"
+	# Cadence setup prepends Xcelium's libpython to LD_LIBRARY_PATH, which breaks
+	# the system python3 (undefined symbol _Py_LegacyLocaleDetected). Python needs none.
+	env -u LD_LIBRARY_PATH "$(PYTHON)" "$$root/sim/programs.py" "$$programs"
 	cp -- "$$root"/sim/fixtures/*.hex "$$programs/"
 	manifest() {
 	    local dest="$$1" source

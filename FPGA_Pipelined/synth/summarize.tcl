@@ -54,6 +54,7 @@ namespace eval synthsummary {
             worst_hold_slack_ns [worst_reported_slack [read_text [file join $run reports timing_hold.rpt]]] \
             leaf_cell_area $total sram_area $macro logic_area [expr {$total - $macro}] \
             sram_instances $macro_count \
+            reg2reg_setup_slack_ns [worst_reported_slack [read_text [file join $run reports timing_setup_reg2reg.rpt]]] \
             area_source DC_report_area timing_source DC_report_timing \
             power NOT_MEASURED timing_signoff NOT_PERFORMED]
     }
